@@ -11,6 +11,9 @@ var LoginOrCreate = React.createClass({
 });
 
 var CreateUser = React.createClass({
+  getInitialState: function() {
+    return {status: ''};
+  },
   handleSubmit: function(e) {
     e.preventDefault();
     var username = this.refs.username.value.trim();
@@ -18,7 +21,6 @@ var CreateUser = React.createClass({
     if(!username || !password) {
       return;
     }
-    // TODO: send info to server and validate
     $.ajax({
       url: this.props.url,
       contentType: 'application/json; charset=utf-8',
@@ -26,10 +28,12 @@ var CreateUser = React.createClass({
       data: JSON.stringify({username: username, password: password}),
       success: function(data) {
         console.log('success');
+        this.setState({status:'Successfully registered'});
       }.bind(this),
       error: function(xhr, status, err) {
         console.log(status);
         console.log(err+': '+xhr.responseText);
+        this.setState({status:xhr.responseText});
       }.bind(this)
     });
     this.refs.username.value = '';
@@ -44,6 +48,8 @@ var CreateUser = React.createClass({
         <input type="password" placeholder="password" ref="password" />
         <br/>
         <input type="submit" value="Submit" />
+        <br/>
+        <span>{this.state.status}</span>
       </form>
     );
   }
