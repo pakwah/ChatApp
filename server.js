@@ -1,8 +1,10 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var server = require('socket.io')(http);
 var bodyParser = require('body-parser');
 var db = require('./db/db.js');
+var path = require('path');
 
 app.use(bodyParser.json());
 
@@ -43,6 +45,8 @@ var activeUsers = {
     }
 };
 
+app.use('/', express.static(path.join(__dirname, 'client')));
+
 // handling request to create user
 app.post('/createUser', function(req, res) {
     if (req.body.username && req.body.password) {
@@ -62,7 +66,7 @@ app.post('/createUser', function(req, res) {
                     if (err) {
                         res.status(500).send('Error when saving the user information in the database: ' + err);
                     } else {
-                        res.status(200).send('Successfully registered user: ' + req.body.name);
+                        res.status(200).send('Successfully registered user: ' + req.body.username);
 
                         // Notify all the connected clients of the user list
                         db.User.find({}, function (err, userList) {

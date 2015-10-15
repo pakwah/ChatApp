@@ -1,16 +1,9 @@
-/**
- * Created by Jason on 10/13/2015.
- */
-
-var React = require('react');
-var ReactDOM = require('react-dom');
-
 var LoginOrCreate = React.createClass({
   render: function () {
     return (
       <div className="loginOrCreate">
         <h1>Hello, world!</h1>
-        <CreateUser />
+        <CreateUser url="/createUser" />
         <Login />
       </div>
     );
@@ -26,6 +19,19 @@ var CreateUser = React.createClass({
       return;
     }
     // TODO: send info to server and validate
+    $.ajax({
+      url: this.props.url,
+      contentType: 'application/json; charset=utf-8',
+      type: 'POST',
+      data: JSON.stringify({username: username, password: password}),
+      success: function(data) {
+        console.log('success');
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.log(status);
+        console.log(err+': '+xhr.responseText);
+      }.bind(this)
+    });
     this.refs.username.value = '';
     this.refs.password.value = '';
     return;
@@ -34,7 +40,9 @@ var CreateUser = React.createClass({
     return (
       <form className="createUser" onSubmit={this.handleSubmit}>
         <input type="text" placeholder="username" ref="username" />
+        <br/>
         <input type="password" placeholder="password" ref="password" />
+        <br/>
         <input type="submit" value="Submit" />
       </form>
     );
