@@ -1,12 +1,12 @@
 var app = require('express')();
 var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var server = require('socket.io')(http);
 var bodyParser = require('body-parser');
 var db = require('./db/db.js');
 
 app.use(bodyParser.json());
 
-// maps socket id to name
+// maps socket id to username
 var activeUsers = {
     users: [],
     push: function(user) {
@@ -34,24 +34,21 @@ var activeUsers = {
         });
     },
     hasId: function(id) {
-        return this.users.filter(function(user) {return user.id === id}).length > 0;
+        return this.getName(id) !== undefined;
+        //return this.users.filter(function(user) {return user.id === id}).length > 0;
     },
     hasName: function(username) {
-        return this.users.filter(function(user) {return user.username === username}).length > 0;
+        return this.getId(username) !== undefined;
+        //return this.users.filter(function(user) {return user.username === username}).length > 0;
     }
 };
 
-var messages = [];  // contains objects with fields (sender, receiver, body)
-
+// handling request to create user
 app.post('/createUser', function(req, res) {
     if (req.body.username && req.body.password) {
-        console.log(req.body.username);
-        console.log(req.body.password);
-
         db.User.find({username: req.body.username}, function(err, user) {
             if (err) {
-                console.log('Error searching for user in the database.');
-                res.status(500).send('An error occurred, please try again');
+                res.status(500).send('An error occurred, please try again. Error: ' + err);
             }
 
             // Only create a user and persist it if it does not already exist.
@@ -63,9 +60,9 @@ app.post('/createUser', function(req, res) {
 
                 newUser.save(function(err) {
                     if (err) {
-                        res.status(500).send('Unable to save the user information, please try again.');
+                        res.status(500).send('Error when saving the user information in the database: ' + err);
                     } else {
-                        res.status(201).send('Successfully registered user: ' + req.body.name);
+                        res.status(200).send('Successfully registered user: ' + req.body.name);
                     }
                 });
             } else {
@@ -77,41 +74,43 @@ app.post('/createUser', function(req, res) {
     }
 });
 
-app.get('/history/:username1/:username2', function(req, res) {
-    var username1 = req.params['username1'];
-    var username2 = req.params['username2'];
-    var hist = messages.filter(function(message) {
-        return (message.sender === username1 && message.receiver === username2) ||
-                (message.sender === username2 && message.receiver === username1);
+// handling request to obtain message history between two users
+app.get('/history/:sender/:receiver', function(req, res) {
+    db.Message.find({sender: req.params['sender'], receiver: req.params['receiver']}, function (err, history) {
+        if (err) {
+            res.status(500).send('Unable to retrieve the message history from the database, error: ' + err);
+        } else {
+            res.status(200).send(history);
+        }
     });
-    res.send(hist);
 });
 
-function getMessageHistory(receiver, cb) {
-    db.Message.find({receiver: receiver, pushed: true}, function(err, pushed) {
+app.get('/userList', function(req, res) {
+    db.User.find({}, function (err, userList) {
         if (err) {
-            console.log('Error retrieving pushed message history for the given receiver.');
+            res.status(500).send('Error obtaining the list of registered users from the database, error: ' + err);
         } else {
-            db.Message.find({receiver: receiver, pushed: false}, function(err, unpushed) {
-                if (err) {
-                    console.log('Error retrieving unpushed message history for the given receiver.');
-                } else {
-                    console.log('Pushed for ' + receiver + ': ' + pushed);
-                    console.log('Unpushed for ' + receiver + ': ' + unpushed);
-                    cb(pushed, unpushed);
-                }
-            });
+            res.status(200).send(userList);
+        }
+    });
+});
+
+function getUnpushedMessages(receiver, cb) {
+    db.Message.find({receiver: receiver, pushed: false}, function(err, unpushed) {
+        if (err) {
+            console.log('Error retrieving unpushed message history for the given receiver from the database: ' + err);
+        } else {
+            cb(unpushed);
         }
     });
 };
 
-io.on('connection', function(socket){
+server.on('connection', function(socket){
     socket.on('login', function(credentials) {
         console.log(activeUsers.users);
-
         db.User.find({username: credentials.username}, function(err, user) {
             if (err) {
-                socket.emit('error', err);
+                socket.emit('error', 'Error in searching for the provided user in the database: ' + err);
             } else {
                 if (user.length === 0) {
                     socket.emit('login', {status: false, message: 'The username provided does not exist.'});
@@ -121,19 +120,16 @@ io.on('connection', function(socket){
                             socket.emit('login', {status: true, message: 'Login succeeded.'});
                             activeUsers.push({id: socket.id, username: credentials.username});
                             // push all the unpushed messages
-                            getMessageHistory(credentials.username, function(pushed, unpushed) {
+                            getUnpushedMessages(credentials.username, function(unpushed) {
                                 for (var index in unpushed) {
-                                    console.log(unpushed[index]);
                                     var msg = unpushed[index];
-                                    io.to(activeUsers.getId(credentials.username)).emit('receive', {sender: msg.sender, message: msg.message});
-                                    //var update = msg;
-                                    //update.pushed = true;
-
-                                    db.Message.update(msg, {pushed: true}, {new: true, upsert: true}, function(err, msg) {
+                                    server.to(activeUsers.getId(credentials.username)).emit('receive', {sender: msg.sender, message: msg.message});
+                                    // update message pushed status
+                                    db.Message.update(msg, {pushed: true}, {new: true, upsert: true}, function(err, response) {
                                         if (err) {
-                                            console.log('Unable to update the pushed status. ' + err);
+                                            console.log('Unable to update the pushed status in the database: ' + err);
                                         } else {
-                                            console.log('Updated ' + msg);
+                                            console.log('Successfully updated the state of a newly pushed message: ' + response);
                                         }
                                     });
                                 }
@@ -149,44 +145,43 @@ io.on('connection', function(socket){
         });
     });
 
-    socket.on('message', function(data){
-        console.log("To " + data.receiver + " " + data.message);
+    socket.on('send', function(packet){
         var sender = activeUsers.getName(socket.id);
-        console.log('sent by: ' + sender);
 
-        db.User.find({username: data.receiver}, function(err, receivers) {
+        db.User.find({username: packet.receiver}, function(err, receivers) {
             if (err) {
-                socket.emit('error', 'Error in searching for the receiver');
+                socket.emit('error', 'Error in searching for the receiver in the database: ' + err);
             } else {
                 if (receivers.length === 0) {
-                    socket.emit('message', {status: false, message: 'Attempting to send messages to a non-existent user.'});
+                    socket.emit('error', {status: false, message: 'Attempting to send messages to a non-existent user.'});
                 } else {
                     // A valid receiver
+                    // * Might extend this functionality to send a message to a group of users
+
                     var newMsg = {
                         sender: activeUsers.getName(socket.id),
                         receiver: receivers[0].username,
-                        message: data.message,
+                        message: packet.message,
                         pushed: false
                     };
 
-                    console.log('Ready to send: ' + newMsg.message + ' to ' + newMsg.receiver);
+                    console.log(activeUsers.hasName(newMsg.receiver));
 
-                    if (activeUsers.hasName(receivers[0].username)) {
+                    if (activeUsers.hasName(newMsg.receiver)) {
                         // persist to database -> message history
                         // set pushed status to true
-                        io.to(activeUsers.getId(receivers[0].username)).emit('receive', {sender: sender, message: data.message});
+                        server.to(activeUsers.getId(newMsg.receiver)).emit('receive', {sender: sender, message: packet.message});
                         newMsg.pushed = true;
-                        console.log('Message sent.');
                     }
 
-                    var newMsg = new db.Message(newMsg);
+                    var msg = new db.Message(newMsg);
 
-                    newMsg.save(function(err) {
+                    msg.save(function(err) {
                         if (err) {
-                            console.log('Unable to save the message, please try again.');
+                            console.log('Unable to persist the message in the db, please try again: ' + err);
                         } else {
-                            console.log('Successfully saved the message from ' + sender + ' to ' + receivers[0].username
-                                + ' to messages');
+                            console.log('Successfully persisted the message from ' + sender + ' to ' + newMsg.receiver
+                                + ' to the db.');
                         }
                     });
                 }
