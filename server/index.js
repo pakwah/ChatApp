@@ -63,6 +63,15 @@ app.post('/createUser', function(req, res) {
                         res.status(500).send('Error when saving the user information in the database: ' + err);
                     } else {
                         res.status(200).send('Successfully registered user: ' + req.body.name);
+
+                        // Notify all the connected clients of the user list
+                        db.User.find({}, function (err, userList) {
+                            if (err) {
+                                res.status(500).send('Error obtaining the list of registered users from the database, error: ' + err);
+                            } else {
+                                server.emit('registeredUsers', userList);
+                            }
+                        });
                     }
                 });
             } else {
@@ -107,7 +116,6 @@ function getUnpushedMessages(receiver, cb) {
 
 server.on('connection', function(socket){
     socket.on('login', function(credentials) {
-        console.log(activeUsers.users);
         db.User.find({username: credentials.username}, function(err, user) {
             if (err) {
                 socket.emit('error', 'Error in searching for the provided user in the database: ' + err);
@@ -117,7 +125,12 @@ server.on('connection', function(socket){
                 } else {
                     if (!activeUsers.hasId(socket.id)) {
                         if (user[0].password === credentials.password) {
+                            // Response to client socket about login status
                             socket.emit('login', {status: true, message: 'Login succeeded.'});
+
+                            // Notify all the connected clients of the newly logged in client
+                            server.emit('activeUsers', {onlineUsers: activeUsers.users});
+
                             activeUsers.push({id: socket.id, username: credentials.username});
                             // push all the unpushed messages
                             getUnpushedMessages(credentials.username, function(unpushed) {
@@ -191,6 +204,9 @@ server.on('connection', function(socket){
 
     socket.on('disconnect', function() {
         activeUsers.removeId(socket.id);
+
+        // Notify all the connected clients of the newly logged out client
+        server.emit('activeUsers', {onlineUsers: activeUsers.users});
     });
 });
 
