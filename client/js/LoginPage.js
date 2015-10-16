@@ -1,6 +1,3 @@
-//import React from 'react'
-//import ReactDOM from 'react-dom'
-
 var React = require('react');
 
 var LoginOrCreate = React.createClass({
@@ -9,7 +6,7 @@ var LoginOrCreate = React.createClass({
       <div className="loginOrCreate">
         <h1>Hello, world!</h1>
         <CreateUser url="/createUser" />
-        <Login />
+        <Login handleLogin={this.props.handleLogin} />
       </div>
     );
   }
@@ -61,11 +58,26 @@ var CreateUser = React.createClass({
 });
 
 var Login = React.createClass({
+  handleSubmit: function(e) {
+    e.preventDefault();
+    var username = this.refs.username.value.trim();
+    var password = this.refs.password.value.trim();
+    if (!username || !password) {
+      return;
+    }
+    this.props.handleLogin({username: username, password: password});
+    this.refs.username.value = '';
+    this.refs.password.value = '';
+  },
   render: function() {
     return (
-      <div className="login">
-        Insert things to login.
-      </div>
+      <form className="login" onSubmit={this.handleSubmit}>
+        <input type="text" placeholder="username" ref="username" />
+        <br/>
+        <input type="text" placeholder="password" ref="password" />
+        <br/>
+        <input type="submit" value="Submit" />
+      </form>
     );
   }
 });
