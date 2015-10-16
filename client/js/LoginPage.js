@@ -1,3 +1,8 @@
+//import React from 'react'
+//import ReactDOM from 'react-dom'
+
+var React = require('react');
+
 var LoginOrCreate = React.createClass({
   render: function () {
     return (
@@ -65,7 +70,5 @@ var Login = React.createClass({
   }
 });
 
-ReactDOM.render(
-    <LoginOrCreate />,
-    document.getElementById('chatapp')
-);
+module.exports = LoginOrCreate;
+
