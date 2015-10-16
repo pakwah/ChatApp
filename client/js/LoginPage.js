@@ -5,7 +5,7 @@ var LoginOrCreate = React.createClass({
     return (
       <div className="loginOrCreate">
         <h1>Hello, world!</h1>
-        <CreateUser url="/createUser" />
+        <CreateUser />
         <Login handleLogin={this.props.handleLogin} />
       </div>
     );
@@ -24,7 +24,7 @@ var CreateUser = React.createClass({
       return;
     }
     $.ajax({
-      url: this.props.url,
+      url: '/createUser',
       contentType: 'application/json; charset=utf-8',
       type: 'POST',
       data: JSON.stringify({username: username, password: password}),

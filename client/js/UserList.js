@@ -17,8 +17,26 @@ var UserNode = React.createClass({
 });
 
 var UserList = React.createClass({
+  getInitialState: function() {
+    return {users: []};
+  },
+  componentDidMount: function() {
+    $.ajax({
+      url: '/userList',
+      // contentType: 'application/json; charset=utf-8',
+      type: 'GET',
+      dataType: 'json',
+      success: function(data) {
+        console.log(data);
+        this.setState({users: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(err+': '+xhr.responseText);
+      }.bind(this)
+    });
+  },
   render: function() {
-    var userNodes = this.props.users.map(function(user, index) {
+    var userNodes = this.state.users.map(function(user, index) {
       return (
         <UserNode name={user.username} key={index} />
       );

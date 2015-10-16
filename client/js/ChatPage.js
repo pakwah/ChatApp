@@ -30,7 +30,7 @@ var ChatPage = React.createClass({
   render: function() {
     return (
       <div>
-        <UserList users={[]} />
+        <UserList />
       </div>
     )
   }
