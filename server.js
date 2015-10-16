@@ -99,7 +99,7 @@ app.get('/history/:sender/:receiver', function(req, res) {
 });
 
 app.get('/userList', function(req, res) {
-    db.User.find({}, function (err, userList) {
+    db.User.find({}, 'username', function (err, userList) {
         if (err) {
             res.status(500).send('Error obtaining the list of registered users from the database, error: ' + err);
         } else {
