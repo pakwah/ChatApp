@@ -74,7 +74,7 @@ var Login = React.createClass({
       <form className="login" onSubmit={this.handleSubmit}>
         <input type="text" placeholder="username" ref="username" />
         <br/>
-        <input type="text" placeholder="password" ref="password" />
+        <input type="password" placeholder="password" ref="password" />
         <br/>
         <input type="submit" value="Submit" />
       </form>
@@ -83,4 +83,3 @@ var Login = React.createClass({
 });
 
 module.exports = LoginOrCreate;
-
