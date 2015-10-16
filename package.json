@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "watch": "watchify client/index.js -v -t babelify -o client/bundle.js",
-    "start": "npm run watch & node server.js"
+    "start": "npm run watch | node server.js"
   },
   "dependencies": {
     "body-parser": "~1.13.2",
