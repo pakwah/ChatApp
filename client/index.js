@@ -16,7 +16,8 @@ var App = React.createClass({
   getInitialState: function() {
     return {
       page: 'login',
-      status: ''
+      status: '',
+      alertVisible: false
     }
   },
   handleLogin: function(data) {
@@ -31,7 +32,8 @@ var App = React.createClass({
       } else if (!response.status) {
         console.log('fail: '+response.message);
         this.setState({
-          status: response.message
+          status: response.message,
+          alertVisible: true
         });
       }
     }.bind(this));
@@ -42,8 +44,8 @@ var App = React.createClass({
     if (this.state.page === 'login') {
       page = (
         <div>
-          <LoginPage handleLogin={this.handleLogin} />
-          <span>{this.state.status}</span>
+          <LoginPage handleLogin={this.handleLogin} alertVisible={this.state.alertVisible}
+            status={this.state.status} />
         </div>
       )
     } else if (this.state.page === 'chat') {

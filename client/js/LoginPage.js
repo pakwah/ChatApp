@@ -1,12 +1,18 @@
 var React = require('react');
+var RBS = require('react-bootstrap');
 
 var LoginOrCreate = React.createClass({
   render: function () {
     return (
       <div className="loginOrCreate">
-        <h1>Hello, world!</h1>
-        <CreateUser />
-        <Login handleLogin={this.props.handleLogin} />
+        <RBS.PageHeader className="text-center">Chat Application</RBS.PageHeader>
+        <RBS.Col md={2} xsOffset={1} xs={2}>
+          <CreateUser />
+        </RBS.Col>
+        <RBS.Col md={2} xsOffset={2} xs={2}>
+          <Login handleLogin={this.props.handleLogin} alertVisible={this.props.alertVisible}
+            status={this.props.status} />
+        </RBS.Col>
       </div>
     );
   }
@@ -14,12 +20,15 @@ var LoginOrCreate = React.createClass({
 
 var CreateUser = React.createClass({
   getInitialState: function() {
-    return {status: ''};
+    return {
+      status: '',
+      alertVisible: false
+    };
   },
   handleSubmit: function(e) {
     e.preventDefault();
-    var username = this.refs.username.value.trim();
-    var password = this.refs.password.value.trim();
+    var username = this.refs.username.getValue().trim();
+    var password = this.refs.password.getValue().trim();
     if(!username || !password) {
       return;
     }
@@ -35,7 +44,10 @@ var CreateUser = React.createClass({
       error: function(xhr, status, err) {
         console.log(status);
         console.log(err+': '+xhr.responseText);
-        this.setState({status:xhr.responseText});
+        this.setState({
+          status: xhr.responseText,
+          alertVisible: true
+        });
       }.bind(this)
     });
     this.refs.username.value = '';
@@ -45,13 +57,14 @@ var CreateUser = React.createClass({
   render: function() {
     return (
       <form className="createUser" onSubmit={this.handleSubmit}>
-        <input type="text" placeholder="username" ref="username" />
-        <br/>
-        <input type="password" placeholder="password" ref="password" />
-        <br/>
-        <input type="submit" value="Submit" />
-        <br/>
-        <span>{this.state.status}</span>
+        <h2>Register</h2>
+        <RBS.Input type="text" placeholder="username" ref="username" />
+        <RBS.Input type="password" placeholder="password" ref="password" />
+        <RBS.ButtonInput type="submit" bsStyle="primary" value="Register" />
+        {this.state.alertVisible ?
+          <RBS.Alert bsStyle="danger">{this.state.status}</RBS.Alert> :
+          null
+        }
       </form>
     );
   }
@@ -60,8 +73,8 @@ var CreateUser = React.createClass({
 var Login = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
-    var username = this.refs.username.value.trim();
-    var password = this.refs.password.value.trim();
+    var username = this.refs.username.getValue().trim();
+    var password = this.refs.password.getValue().trim();
     if (!username || !password) {
       return;
     }
@@ -72,11 +85,14 @@ var Login = React.createClass({
   render: function() {
     return (
       <form className="login" onSubmit={this.handleSubmit}>
-        <input type="text" placeholder="username" ref="username" />
-        <br/>
-        <input type="password" placeholder="password" ref="password" />
-        <br/>
-        <input type="submit" value="Submit" />
+        <h2>Login</h2>
+        <RBS.Input type="text" placeholder="username" ref="username" />
+        <RBS.Input type="password" placeholder="password" ref="password" />
+        <RBS.ButtonInput type="submit" bsStyle="primary" value="Login" />
+        {this.props.alertVisible ?
+          <RBS.Alert bsStyle="danger">{this.props.status}</RBS.Alert> :
+          null
+        }
       </form>
     );
   }
