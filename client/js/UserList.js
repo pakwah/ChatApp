@@ -3,6 +3,7 @@
  */
 
 var React = require('react');
+var $ = require('jquery');
 
 var UserNode = React.createClass({
   onClick: function(e) {

@@ -1,5 +1,6 @@
 var React = require('react');
 var RBS = require('react-bootstrap');
+var $ = require('jquery');
 
 var LoginOrCreate = React.createClass({
   render: function () {
