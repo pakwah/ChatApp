@@ -38,7 +38,10 @@ var App = React.createClass({
     }.bind(this));
 
   },
-  handleMessage: function(text) {
+  handleSendMessage: function(data) {
+    var recipient = data.recipient;
+    var text = data.text;
+    socket.emit('send', {receiver: recipient, message: text});
   },
   render: function() {
     var page = null;
