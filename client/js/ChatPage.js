@@ -13,7 +13,7 @@ var MessageForm = React.createClass({
     if (!text) {
       return;
     }
-    this.props.onMessageSubmit({text: text});
+    this.props.handleMessage(text);
     this.refs.text.value = '';
   },
   render: function() {
@@ -27,10 +27,29 @@ var MessageForm = React.createClass({
 });
 
 var ChatPage = React.createClass({
+  getInitialState: function() {
+    return {
+      recipient: null
+    }
+  },
+  handleClickUser: function(data) {
+    var username = data.username;
+    this.setState({recipient: username});
+  },
+  handleSendMessage: function(text) {
+    if (this.state.recipient) {
+      this.props.handleSendMessage({
+        text: text,
+        recipient: this.state.recipient
+      });
+    }
+  },
   render: function() {
     return (
       <div>
-        <UserList />
+        <UserList handleClickUser={this.handleClickUser}/>
+        <h3>{this.state.recipient}</h3>
+        <MessageForm handleMessage={this.handleMessage} />
       </div>
     )
   }

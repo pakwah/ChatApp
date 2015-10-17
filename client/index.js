@@ -17,7 +17,8 @@ var App = React.createClass({
     return {
       page: 'login',
       status: '',
-      alertVisible: false
+      alertVisible: false,
+      username: ''
     }
   },
   handleLogin: function(data) {
@@ -38,6 +39,11 @@ var App = React.createClass({
       }
     }.bind(this));
 
+  },
+  handleSendMessage: function(data) {
+    var recipient = data.recipient;
+    var text = data.text;
+    socket.emit('send', {receiver: recipient, message: text});
   },
   render: function() {
     var page = null;
