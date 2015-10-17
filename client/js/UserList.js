@@ -5,12 +5,16 @@
 var React = require('react');
 
 var UserNode = React.createClass({
+  onClick: function(e) {
+    e.preventDefault();
+    this.props.handleClickUser({username: this.props.name});
+  },
   render: function() {
     return (
       <div>
-        <h3>
+        <button onClick={this.onClick} >
           {this.props.name}
-        </h3>
+        </button>
       </div>
     )
   }
@@ -18,7 +22,10 @@ var UserNode = React.createClass({
 
 var UserList = React.createClass({
   getInitialState: function() {
-    return {users: []};
+    return {
+      users: [],
+      selected: -1
+    };
   },
   componentDidMount: function() {
     $.ajax({
@@ -27,7 +34,6 @@ var UserList = React.createClass({
       type: 'GET',
       dataType: 'json',
       success: function(data) {
-        console.log(data);
         this.setState({users: data});
       }.bind(this),
       error: function(xhr, status, err) {
@@ -38,9 +44,9 @@ var UserList = React.createClass({
   render: function() {
     var userNodes = this.state.users.map(function(user, index) {
       return (
-        <UserNode name={user.username} key={index} />
+        <UserNode name={user.username} handleClickUser={this.props.handleClickUser} key={index}/>
       );
-    });
+    }, this);
     return (
       <div className="userList">
         <h2>Users</h2>

@@ -16,7 +16,8 @@ var App = React.createClass({
   getInitialState: function() {
     return {
       page: 'login',
-      status: ''
+      status: '',
+      username: ''
     }
   },
   handleLogin: function(data) {
@@ -36,6 +37,8 @@ var App = React.createClass({
       }
     }.bind(this));
 
+  },
+  handleMessage: function(text) {
   },
   render: function() {
     var page = null;

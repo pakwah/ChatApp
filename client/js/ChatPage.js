@@ -13,7 +13,7 @@ var MessageForm = React.createClass({
     if (!text) {
       return;
     }
-    this.props.onMessageSubmit({text: text});
+    this.props.handleMessage(text);
     this.refs.text.value = '';
   },
   render: function() {
@@ -27,10 +27,14 @@ var MessageForm = React.createClass({
 });
 
 var ChatPage = React.createClass({
+  handleClickUser: function(data) {
+    console.log(data);
+  },
   render: function() {
     return (
       <div>
-        <UserList />
+        <MessageForm handleMessage={this.props.handleMessage} />
+        <UserList handleClickUser={this.handleClickUser}/>
       </div>
     )
   }
