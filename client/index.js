@@ -56,7 +56,7 @@ var App = React.createClass({
       )
     } else if (this.state.page === 'chat') {
       page = (
-        <ChatPage />
+        <ChatPage handleMessage={this.handleSendMessage}/>
       )
     }
     return (

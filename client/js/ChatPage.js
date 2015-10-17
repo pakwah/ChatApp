@@ -38,7 +38,7 @@ var ChatPage = React.createClass({
   },
   handleSendMessage: function(text) {
     if (this.state.recipient) {
-      this.props.handleSendMessage({
+      this.props.handleMessage({
         text: text,
         recipient: this.state.recipient
       });
@@ -49,7 +49,7 @@ var ChatPage = React.createClass({
       <div>
         <UserList handleClickUser={this.handleClickUser}/>
         <h3>{this.state.recipient}</h3>
-        <MessageForm handleMessage={this.handleMessage} />
+        <MessageForm handleMessage={this.props.handleMessage} />
       </div>
     )
   }
