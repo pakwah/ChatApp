@@ -164,7 +164,6 @@ server.on('connection', function(socket){
 
     socket.on('send', function(packet){
         var sender = activeUsers.getName(socket.id);
-
         db.User.find({username: packet.receiver}, function(err, receivers) {
             if (err) {
                 socket.emit('error', 'Error in searching for the receiver in the database: ' + err);

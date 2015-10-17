@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "watch": "watchify client/index.js -v -t babelify -o client/bundle.js",
-    "start": "concurrent \"mongod\" \"npm run watch\" \"node server.js\""
+    "start": "concurrent \"mongod\" \"npm run watch\" \"nodemon server.js\""
   },
   "dependencies": {
     "body-parser": "~1.13.2",
@@ -22,6 +22,7 @@
     "babelify": "^6.3.0",
     "browserify": "^11.2.0",
     "concurrently": "^0.1.1",
+    "nodemon": "^1.7.1",
     "request": "^2.65.0",
     "watchify": "^3.4.0"
   }

@@ -43,7 +43,8 @@ var App = React.createClass({
   handleSendMessage: function(data) {
     var recipient = data.recipient;
     var text = data.text;
-    socket.emit('send', {receiver: recipient, message: text});
+    var packet = {receiver: recipient, message: text};
+    socket.emit('send', packet);
   },
   render: function() {
     var page = null;
