@@ -25,8 +25,7 @@ var UserNode = React.createClass({
 var UserList = React.createClass({
   getInitialState: function() {
     return {
-      users: [],
-      selected: -1
+      users: []
     };
   },
   componentDidMount: function() {
@@ -42,11 +41,6 @@ var UserList = React.createClass({
         console.error(err+': '+xhr.responseText);
       }.bind(this)
     });
-  },
-  handleSelect: function(e, selectedUser) {
-    e.preventDefault();
-    console.log(selectedUser);
-    this.props.handleClickUser({username: selectedUser});
   },
   render: function() {
     var userNodes = this.state.users.map(function(user, index) {

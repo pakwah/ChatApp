@@ -25,7 +25,6 @@ var App = React.createClass({
   componentDidMount: function() {
     socket.on('activeUsers', function(data) {
       this.setState({activeUsers: data.onlineUsers});
-      console.log(this.state.activeUsers);
     }.bind(this));
   },
   handleLogin: function(data) {
@@ -39,7 +38,7 @@ var App = React.createClass({
           username: username
         });
       } else if (!response.status) {
-        console.log('fail: '+response.message);
+        console.error('fail: '+response.message);
         this.setState({
           status: response.message,
           alertVisible: true
