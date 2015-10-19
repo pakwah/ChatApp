@@ -3,6 +3,7 @@
  */
 
 var React = require('react');
+var RBS = require('react-bootstrap');
 
 var UserList = require('./UserList');
 
@@ -48,9 +49,13 @@ var ChatPage = React.createClass({
   render: function() {
     return (
       <div>
-        <UserList handleClickUser={this.handleClickUser}/>
-        <h3>{this.state.recipient}</h3>
-        <MessageForm handleMessage={this.handleSendMessage} />
+        <RBS.Col md={2} xs={2}>
+          <UserList handleClickUser={this.handleClickUser} username={this.props.username} />
+        </RBS.Col>
+        <RBS.Col md={2} xsOffset={2} xs={2}>
+          <h3>{this.state.recipient}</h3>
+          <MessageForm handleMessage={this.handleSendMessage} />
+        </RBS.Col>
       </div>
     )
   }

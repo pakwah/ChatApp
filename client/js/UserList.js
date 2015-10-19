@@ -4,19 +4,24 @@
 
 var React = require('react');
 var $ = require('jquery');
+var RBS = require('react-bootstrap');
 
 var UserNode = React.createClass({
+  getInitialState: function() {
+    return {
+      clickedUser: ''
+    }
+  },
   onClick: function(e) {
     e.preventDefault();
+    this.setState({clickedUser: this.props.name});
     this.props.handleClickUser({username: this.props.name});
   },
   render: function() {
     return (
-      <div>
-        <button onClick={this.onClick} >
-          {this.props.name}
-        </button>
-      </div>
+      <RBS.ListGroupItem onClick={this.onClick} >
+        {this.props.name}
+      </RBS.ListGroupItem>
     )
   }
 });
@@ -44,14 +49,18 @@ var UserList = React.createClass({
   },
   render: function() {
     var userNodes = this.state.users.map(function(user, index) {
-      return (
-        <UserNode name={user.username} handleClickUser={this.props.handleClickUser} key={index}/>
-      );
+      if (user.username !== this.props.username) {
+        return (
+          <UserNode name={user.username} handleClickUser={this.props.handleClickUser} key={index} />
+        );
+      }
     }, this);
     return (
       <div className="userList">
-        <h2>Users</h2>
-        {userNodes}
+        <h2 className="text-center">Users</h2>
+        <RBS.ListGroup>
+          {userNodes}
+        </RBS.ListGroup>
       </div>
     );
   }

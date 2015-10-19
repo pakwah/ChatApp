@@ -28,7 +28,8 @@ var App = React.createClass({
     socket.on('login', function(response) {
       if(response.status) {
         this.setState({
-          page: 'chat'
+          page: 'chat',
+          username: username
         });
       } else if (!response.status) {
         console.log('fail: '+response.message);
@@ -57,7 +58,7 @@ var App = React.createClass({
       )
     } else if (this.state.page === 'chat') {
       page = (
-        <ChatPage handleMessage={this.handleSendMessage}/>
+        <ChatPage handleMessage={this.handleSendMessage} username={this.state.username} />
       )
     }
     return (
