@@ -13,10 +13,10 @@ var UserNode = React.createClass({
   render: function() {
     return (
       <RBS.NavItem eventKey={this.props.name} onSelect={this.onClick} >
-        {this.props.name} {this.props.activeUsers.indexOf(this.props.name) !== -1 ?
-          <RBS.Glyphicon glyph="asterisk"/> :
-          null
-        }
+        {this.props.activeUsers.indexOf(this.props.name) !== -1 ?
+            <RBS.Glyphicon glyph="eye-open" /> :
+            <RBS.Glyphicon glyph="eye-close" style={{color:"red"}} />
+          } {this.props.name}
       </RBS.NavItem>
     )
   }
