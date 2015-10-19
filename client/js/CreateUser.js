@@ -39,8 +39,6 @@ var CreateUser = React.createClass({
         });
       }.bind(this)
     });
-    this.refs.username.value = '';
-    this.refs.password.value = '';
     return;
   },
   render: function() {
