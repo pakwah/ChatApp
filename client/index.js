@@ -57,10 +57,8 @@ var App = React.createClass({
     var page = null;
     if (this.state.page === 'login') {
       page = (
-        <div>
-          <LoginPage handleLogin={this.handleLogin} alertVisible={this.state.alertVisible}
-            status={this.state.status} />
-        </div>
+        <LoginPage handleLogin={this.handleLogin} alertVisible={this.state.alertVisible}
+          status={this.state.status} />
       )
     } else if (this.state.page === 'chat') {
       page = (

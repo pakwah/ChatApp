@@ -3,25 +3,76 @@
  */
 
 var React = require('react');
+var $ = require('jquery');
 var RBS = require('react-bootstrap');
 
 var UserList = require('./UserList');
 
+var MessageNode = React.createClass({
+  render: function() {
+    var timestamp = new Date(this.props.message.timestamp);
+    return (
+      <li>
+        <span>
+          <b>{this.props.message.sender} </b>
+          <i>{timestamp.toLocaleString()}</i>
+        </span>
+        <div>{this.props.message.message}</div>
+      </li>
+    )
+  }
+});
+
+var MessageHistory = React.createClass({
+  getInitialState: function() {
+    return {
+      messages: []
+    }
+  },
+  componentWillReceiveProps: function() {
+    var url = '/history/' + this.props.username + '/' + this.props.recipient;
+    $.ajax({
+      url: url,
+      type: 'GET',
+      dataType: 'json',
+      success: function(data) {
+        this.setState({messages: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(err+': '+xhr.responseText);
+      }.bind(this)
+    });
+  },
+  render: function() {
+    var messageNodes = this.state.messages.map(function(message) {
+      return (
+        <MessageNode message={message} key={message._id} />
+      );
+    }, this);
+    return (
+      <ul>
+        {messageNodes}
+      </ul>
+    )
+  }
+});
+
 var MessageForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
-    var text = this.refs.text.value.trim();
+    var text = this.refs.text.getValue().trim();
+    console.log(text);
     if (!text) {
       return;
     }
+    this.refs.text.getInputDOMNode().value = '';
     this.props.handleMessage(text);
-    this.refs.text.value = '';
   },
   render: function() {
     return (
-      <form className="messageForm" onSubmit={this.handleSubmit}>
-        <input type="text" placeholder="Type your message here" ref="text" />
-        <input type="submit" value="Post" />
+      <form className="form-inline" onSubmit={this.handleSubmit}>
+        <RBS.Input type="text" placeholder="Type your message here" ref="text"/>
+        <RBS.ButtonInput type="submit" value="Post" />
       </form>
     )
   }
@@ -49,13 +100,18 @@ var ChatPage = React.createClass({
   render: function() {
     return (
       <div>
-        <RBS.Col md={2} xs={2}>
+        <RBS.Col md={2}>
           <UserList handleClickUser={this.handleClickUser} username={this.props.username}
             activeUsers={this.props.activeUsers} />
         </RBS.Col>
-        <RBS.Col md={2} xsOffset={2} xs={2}>
+        <RBS.Col md={10}>
           <h3>{this.state.recipient}</h3>
-          <MessageForm handleMessage={this.handleSendMessage} />
+          <RBS.Row>
+            <MessageHistory username={this.props.username} recipient={this.state.recipient} />
+          </RBS.Row>
+          <RBS.Row style={{position:"fixed", bottom:"5px"}}>
+            <MessageForm handleMessage={this.handleSendMessage} />
+          </RBS.Row>
         </RBS.Col>
       </div>
     )
