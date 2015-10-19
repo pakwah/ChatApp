@@ -20,9 +20,8 @@ var App = React.createClass({
       status: '',
       alertVisible: false,
       username: '',
-      recipient: null,
       activeUsers: [],
-      messages: {}  // map recipient name to list of messages with that user
+      unreadCount: {}
     }
   },
   componentDidMount: function() {
@@ -30,12 +29,12 @@ var App = React.createClass({
       this.setState({activeUsers: data.onlineUsers});
     }.bind(this));
     socket.on('receive', function(data) {
-      if (!this.state.messages[data.sender]) {
-        return;
-      }
       this.setState(function(prevState, curProps) {
-        prevState = JSON.parse(JSON.stringify(prevState));
-        prevState.messages[data.sender].push(data);
+        if(prevState.unreadCount[data.sender] === undefined) {
+          prevState.unreadCount[data.sender] = 1;
+        } else {
+          prevState.unreadCount[data.sender]++;
+        }
         return prevState;
       });
     }.bind(this));
@@ -58,44 +57,18 @@ var App = React.createClass({
         });
       }
     }.bind(this));
-
+  },
+  clearUnread: function(username) {
+    this.setState(function(prevState, curProps) {
+      prevState.unreadCount[username] = 0;
+      return prevState;
+    });
   },
   handleSendMessage: function(data) {
     var recipient = data.recipient;
     var text = data.text;
     var packet = {receiver: recipient, message: text};
     socket.emit('send', packet);
-  },
-  getMessages: function(recipient) {
-    if (recipient === undefined || recipient === null) {
-      return [];
-    }
-    if (typeof this.state.messages[recipient] === 'undefined') {
-      var url = '/history/' + this.state.username + '/' + recipient;
-      $.ajax({
-        url: url,
-        type: 'GET',
-        dataType: 'json',
-        success: function(data) {
-          this.setState(function(prevState, curProps) {
-            prevState = JSON.parse(JSON.stringify(prevState));
-            prevState.messages[recipient] = data;
-            return prevState;
-          });
-          this.forceUpdate();
-        }.bind(this),
-        error: function(xhr, status, err) {
-          console.error(err+': '+xhr.responseText);
-        }.bind(this)
-      });
-      return [];
-    }
-    return this.state.messages[recipient];
-  },
-  handleClickUser: function(recipient) {
-    this.setState({
-      recipient: recipient
-    });
   },
   render: function() {
     var page = null;
@@ -107,8 +80,8 @@ var App = React.createClass({
     } else if (this.state.page === 'chat') {
       page = (
         <ChatPage handleMessage={this.handleSendMessage} username={this.state.username}
-          activeUsers={this.state.activeUsers} messages={this.getMessages(this.state.recipient)}
-          handleClickUser={this.handleClickUser} />
+          activeUsers={this.state.activeUsers} unreadCount={this.state.unreadCount}
+          clearUnread={this.clearUnread} />
       )
     }
     return (
