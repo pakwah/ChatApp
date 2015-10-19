@@ -5,6 +5,7 @@
 
 var ReactDOM = require('react-dom');
 var React = require('react');
+var $ = require('jquery');
 var io = require('socket.io-client');
 var LoginPage = require('./js/LoginPage.js');
 var ChatPage = require('./js/ChatPage.js');
@@ -29,12 +30,12 @@ var App = React.createClass({
       this.setState({activeUsers: data.onlineUsers});
     }.bind(this));
     socket.on('receive', function(data) {
+      if (!this.state.messages[data.sender]) {
+        return;
+      }
       this.setState(function(prevState, curProps) {
         prevState = JSON.parse(JSON.stringify(prevState));
-        if (!prevState.messages[data.sender]) {
-          prevState.messages[data.sender] = [];
-        }
-        prevState.messages[data.sender].push(data.message);
+        prevState.messages[data.sender].push(data);
         return prevState;
       });
     }.bind(this));
@@ -66,10 +67,26 @@ var App = React.createClass({
     socket.emit('send', packet);
   },
   getMessages: function(recipient) {
-    if (!recipient) {
+    if (recipient === undefined || recipient === null) {
       return [];
     }
     if (typeof this.state.messages[recipient] === 'undefined') {
+      var url = '/history/' + this.state.username + '/' + recipient;
+      $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          this.setState(function(prevState, curProps) {
+            prevState = JSON.parse(JSON.stringify(prevState));
+            prevState.messages[recipient] = data;
+            return prevState;
+          });
+        }.bind(this),
+        error: function(xhr, status, err) {
+          console.error(err+': '+xhr.responseText);
+        }.bind(this)
+      });
       return [];
     }
     return this.state.messages[recipient];

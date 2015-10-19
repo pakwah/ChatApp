@@ -78,21 +78,11 @@ var MessageForm = React.createClass({
   }
 });
 
-var MessageNode = React.createClass({
-  render: function() {
-    return (
-      <p>
-        {this.props.text}
-      </p>
-    )
-  }
-});
-
 var MessageList = React.createClass({
   render: function() {
     var messageNodes = this.props.data.map(function(d) {
       return (
-        <MessageNode text={d}/>
+        <MessageNode message={d}/>
       )
     });
     return (
@@ -133,13 +123,12 @@ var ChatPage = React.createClass({
         <RBS.Col md={10}>
           <h3>{this.state.recipient}</h3>
           <RBS.Row>
-            <MessageHistory username={this.props.username} recipient={this.state.recipient} />
+            <MessageList data={this.props.messages} />
           </RBS.Row>
           <RBS.Row style={{position:"fixed", bottom:"5px"}}>
             <MessageForm handleMessage={this.handleSendMessage} />
           </RBS.Row>
         </RBS.Col>
-        <MessageList data={this.props.messages} />
       </div>
     )
   }
