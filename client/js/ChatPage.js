@@ -27,6 +27,31 @@ var MessageForm = React.createClass({
   }
 });
 
+var MessageNode = React.createClass({
+  render: function() {
+    return (
+      <p>
+        {this.props.text}
+      </p>
+    )
+  }
+});
+
+var MessageList = React.createClass({
+  render: function() {
+    var messageNodes = this.props.data.map(function(d) {
+      return (
+        <MessageNode text={d}/>
+      )
+    });
+    return (
+      <div>
+        {messageNodes}
+      </div>
+    )
+  }
+});
+
 var ChatPage = React.createClass({
   getInitialState: function() {
     return {
@@ -35,6 +60,7 @@ var ChatPage = React.createClass({
   },
   handleClickUser: function(data) {
     var username = data.username;
+    this.props.handleClickUser(username);
     this.setState({recipient: username});
   },
   handleSendMessage: function(text) {
@@ -57,6 +83,7 @@ var ChatPage = React.createClass({
           <h3>{this.state.recipient}</h3>
           <MessageForm handleMessage={this.handleSendMessage} />
         </RBS.Col>
+        <MessageList data={this.props.messages} />
       </div>
     )
   }

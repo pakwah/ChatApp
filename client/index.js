@@ -19,12 +19,24 @@ var App = React.createClass({
       status: '',
       alertVisible: false,
       username: '',
-      activeUsers: []
+      recipient: null,
+      activeUsers: [],
+      messages: {}  // map recipient name to list of messages with that user
     }
   },
   componentDidMount: function() {
     socket.on('activeUsers', function(data) {
       this.setState({activeUsers: data.onlineUsers});
+    }.bind(this));
+    socket.on('receive', function(data) {
+      this.setState(function(prevState, curProps) {
+        prevState = JSON.parse(JSON.stringify(prevState));
+        if (!prevState.messages[data.sender]) {
+          prevState.messages[data.sender] = [];
+        }
+        prevState.messages[data.sender].push(data.message);
+        return prevState;
+      });
     }.bind(this));
   },
   handleLogin: function(data) {
@@ -53,6 +65,20 @@ var App = React.createClass({
     var packet = {receiver: recipient, message: text};
     socket.emit('send', packet);
   },
+  getMessages: function(recipient) {
+    if (!recipient) {
+      return [];
+    }
+    if (typeof this.state.messages[recipient] === 'undefined') {
+      return [];
+    }
+    return this.state.messages[recipient];
+  },
+  handleClickUser: function(recipient) {
+    this.setState({
+      recipient: recipient
+    });
+  },
   render: function() {
     var page = null;
     if (this.state.page === 'login') {
@@ -65,7 +91,8 @@ var App = React.createClass({
     } else if (this.state.page === 'chat') {
       page = (
         <ChatPage handleMessage={this.handleSendMessage} username={this.state.username}
-          activeUsers={this.state.activeUsers} />
+          activeUsers={this.state.activeUsers} messages={this.getMessages(this.state.recipient)}
+          handleClickUser={this.handleClickUser} />
       )
     }
     return (
