@@ -82,6 +82,7 @@ var App = React.createClass({
             prevState.messages[recipient] = data;
             return prevState;
           });
+          this.forceUpdate();
         }.bind(this),
         error: function(xhr, status, err) {
           console.error(err+': '+xhr.responseText);
