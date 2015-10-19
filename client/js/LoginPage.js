@@ -9,11 +9,11 @@ var LoginOrCreate = React.createClass({
       <div className="loginOrCreate">
         <RBS.PageHeader className="text-center">Chat Application</RBS.PageHeader>
         <RBS.Col md={2} xsOffset={1} xs={2}>
-          <CreateUser />
-        </RBS.Col>
-        <RBS.Col md={2} xsOffset={2} xs={2}>
           <Login handleLogin={this.props.handleLogin} alertVisible={this.props.alertVisible}
             status={this.props.status} />
+        </RBS.Col>
+        <RBS.Col md={2} xsOffset={2} xs={2}>
+          <CreateUser />
         </RBS.Col>
       </div>
     );
