@@ -20,7 +20,10 @@ var UserNode = React.createClass({
   render: function() {
     return (
       <RBS.ListGroupItem onClick={this.onClick} >
-        {this.props.name}
+        {this.props.name} {this.props.activeUsers.indexOf(this.props.name) !== -1 ?
+          <RBS.Glyphicon glyph="asterisk"/> :
+          null
+        }
       </RBS.ListGroupItem>
     )
   }
@@ -51,7 +54,8 @@ var UserList = React.createClass({
     var userNodes = this.state.users.map(function(user, index) {
       if (user.username !== this.props.username) {
         return (
-          <UserNode name={user.username} handleClickUser={this.props.handleClickUser} key={index} />
+          <UserNode name={user.username} handleClickUser={this.props.handleClickUser} key={index}
+            activeUsers={this.props.activeUsers} />
         );
       }
     }, this);

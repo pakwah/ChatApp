@@ -50,7 +50,8 @@ var ChatPage = React.createClass({
     return (
       <div>
         <RBS.Col md={2} xs={2}>
-          <UserList handleClickUser={this.handleClickUser} username={this.props.username} />
+          <UserList handleClickUser={this.handleClickUser} username={this.props.username}
+            activeUsers={this.props.activeUsers} />
         </RBS.Col>
         <RBS.Col md={2} xsOffset={2} xs={2}>
           <h3>{this.state.recipient}</h3>

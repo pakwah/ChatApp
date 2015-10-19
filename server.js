@@ -22,6 +22,13 @@ var activeUsers = {
         }
         return undefined;
     },
+    getAllNames: function() {
+      var usernames = [];
+      this.users.forEach(function(elem, index, array) {
+        usernames.push(elem.username);
+      });
+      return usernames;
+    },
     getName: function(id) {
         for (var i = 0; i < this.users.length; i++) {
             if (this.users[i].id === id) {
@@ -132,10 +139,11 @@ server.on('connection', function(socket){
                             // Response to client socket about login status
                             socket.emit('login', {status: true, message: 'Login succeeded.'});
 
-                            // Notify all the connected clients of the newly logged in client
-                            server.emit('activeUsers', {onlineUsers: activeUsers.users});
-
                             activeUsers.push({id: socket.id, username: credentials.username});
+
+                            // Notify all the connected clients of the newly logged in client
+                            server.emit('activeUsers', {onlineUsers: activeUsers.getAllNames()});
+
                             // push all the unpushed messages
                             getUnpushedMessages(credentials.username, function(unpushed) {
                                 for (var index in unpushed) {

@@ -18,8 +18,15 @@ var App = React.createClass({
       page: 'login',
       status: '',
       alertVisible: false,
-      username: ''
+      username: '',
+      activeUsers: []
     }
+  },
+  componentDidMount: function() {
+    socket.on('activeUsers', function(data) {
+      this.setState({activeUsers: data.onlineUsers});
+      console.log(this.state.activeUsers);
+    }.bind(this));
   },
   handleLogin: function(data) {
     var username = data.username;
@@ -58,7 +65,8 @@ var App = React.createClass({
       )
     } else if (this.state.page === 'chat') {
       page = (
-        <ChatPage handleMessage={this.handleSendMessage} username={this.state.username} />
+        <ChatPage handleMessage={this.handleSendMessage} username={this.state.username}
+          activeUsers={this.state.activeUsers} />
       )
     }
     return (
