@@ -48,7 +48,7 @@ var MessageList = React.createClass({
   render: function() {
     var messageNodes = this.props.data.map(function(d) {
       return (
-        <MessageNode message={d}/>
+        <MessageNode message={d} key={d._id}/>
       )
     });
     return (
