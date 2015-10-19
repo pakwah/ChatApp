@@ -26,14 +26,16 @@ var CreateUser = React.createClass({
         console.log('success');
         this.setState({
           status: 'Successfully registered',
-          alertStyle: 'success'
+          alertStyle: 'success',
+          alertVisible: true
         });
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(err+': '+xhr.responseText);
         this.setState({
           status: xhr.responseText,
-          alertVisible: true
+          alertStyle: 'danger',
+          alertVisible: true,
         });
       }.bind(this)
     });

@@ -4,19 +4,20 @@
 
 var React = require('react');
 var $ = require('jquery');
+var RBS = require('react-bootstrap');
 
 var UserNode = React.createClass({
-  onClick: function(e) {
-    e.preventDefault();
+  onClick: function() {
     this.props.handleClickUser({username: this.props.name});
   },
   render: function() {
     return (
-      <div>
-        <button onClick={this.onClick} >
-          {this.props.name}
-        </button>
-      </div>
+      <RBS.NavItem eventKey={this.props.name} onSelect={this.onClick} >
+        {this.props.name} {this.props.activeUsers.indexOf(this.props.name) !== -1 ?
+          <RBS.Glyphicon glyph="asterisk"/> :
+          null
+        }
+      </RBS.NavItem>
     )
   }
 });
@@ -24,8 +25,7 @@ var UserNode = React.createClass({
 var UserList = React.createClass({
   getInitialState: function() {
     return {
-      users: [],
-      selected: -1
+      users: []
     };
   },
   componentDidMount: function() {
@@ -44,14 +44,19 @@ var UserList = React.createClass({
   },
   render: function() {
     var userNodes = this.state.users.map(function(user, index) {
-      return (
-        <UserNode name={user.username} handleClickUser={this.props.handleClickUser} key={index}/>
-      );
+      if (user.username !== this.props.username) {
+        return (
+          <UserNode name={user.username} handleClickUser={this.props.handleClickUser} key={index}
+            activeUsers={this.props.activeUsers} />
+        );
+      }
     }, this);
     return (
       <div className="userList">
-        <h2>Users</h2>
-        {userNodes}
+        <h2 className="text-center">Users</h2>
+        <RBS.Nav bsStyle="tabs" stacked>
+          {userNodes}
+        </RBS.Nav>
       </div>
     );
   }

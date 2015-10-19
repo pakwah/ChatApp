@@ -18,8 +18,14 @@ var App = React.createClass({
       page: 'login',
       status: '',
       alertVisible: false,
-      username: ''
+      username: '',
+      activeUsers: []
     }
+  },
+  componentDidMount: function() {
+    socket.on('activeUsers', function(data) {
+      this.setState({activeUsers: data.onlineUsers});
+    }.bind(this));
   },
   handleLogin: function(data) {
     var username = data.username;
@@ -28,10 +34,11 @@ var App = React.createClass({
     socket.on('login', function(response) {
       if(response.status) {
         this.setState({
-          page: 'chat'
+          page: 'chat',
+          username: username
         });
       } else if (!response.status) {
-        console.log('fail: '+response.message);
+        console.error('fail: '+response.message);
         this.setState({
           status: response.message,
           alertVisible: true
@@ -57,7 +64,8 @@ var App = React.createClass({
       )
     } else if (this.state.page === 'chat') {
       page = (
-        <ChatPage handleMessage={this.handleSendMessage}/>
+        <ChatPage handleMessage={this.handleSendMessage} username={this.state.username}
+          activeUsers={this.state.activeUsers} />
       )
     }
     return (
