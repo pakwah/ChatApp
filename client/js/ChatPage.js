@@ -23,40 +23,6 @@ var MessageNode = React.createClass({
   }
 });
 
-var MessageHistory = React.createClass({
-  getInitialState: function() {
-    return {
-      messages: []
-    }
-  },
-  componentWillReceiveProps: function() {
-    var url = '/history/' + this.props.username + '/' + this.props.recipient;
-    $.ajax({
-      url: url,
-      type: 'GET',
-      dataType: 'json',
-      success: function(data) {
-        this.setState({messages: data});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(err+': '+xhr.responseText);
-      }.bind(this)
-    });
-  },
-  render: function() {
-    var messageNodes = this.state.messages.map(function(message) {
-      return (
-        <MessageNode message={message} key={message._id} />
-      );
-    }, this);
-    return (
-      <ul>
-        {messageNodes}
-      </ul>
-    )
-  }
-});
-
 var MessageForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
