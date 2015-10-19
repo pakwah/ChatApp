@@ -15,7 +15,8 @@ var messageSchema = mongoose.Schema({
     sender: String,
     receiver: String,
     message: String,
-    pushed: Boolean
+    pushed: Boolean,
+    timestamp: Number
 });
 
 var Message = mongoose.model('Message', messageSchema);

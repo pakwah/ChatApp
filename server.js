@@ -37,11 +37,9 @@ var activeUsers = {
     },
     hasId: function(id) {
         return this.getName(id) !== undefined;
-        //return this.users.filter(function(user) {return user.id === id}).length > 0;
     },
     hasName: function(username) {
         return this.getId(username) !== undefined;
-        //return this.users.filter(function(user) {return user.username === username}).length > 0;
     }
 };
 
@@ -89,13 +87,18 @@ app.post('/createUser', function(req, res) {
 
 // handling request to obtain message history between two users
 app.get('/history/:sender/:receiver', function(req, res) {
-    db.Message.find({sender: req.params['sender'], receiver: req.params['receiver']}, function (err, history) {
-        if (err) {
-            res.status(500).send('Unable to retrieve the message history from the database, error: ' + err);
-        } else {
-            res.status(200).send(history);
-        }
-    });
+    db.Message.find({$or: [
+        {sender: req.params['sender'], receiver: req.params['receiver']},
+        {sender: req.params['receiver'], receiver: req.params['sender']}
+    ]})
+        .sort({timestamp: 'asc'})
+        .exec(function (err, history) {
+            if (err) {
+                res.status(500).send('Unable to retrieve the message history from the database, error: ' + err);
+            } else {
+                res.status(200).send(history);
+            }
+        });
 });
 
 app.get('/userList', function(req, res) {
@@ -127,7 +130,7 @@ server.on('connection', function(socket){
                 if (user.length === 0) {
                     socket.emit('login', {status: false, message: 'The username provided does not exist.'});
                 } else {
-                    if (!activeUsers.hasId(socket.id)) {
+                    if (!activeUsers.hasId(socket.id) && !activeUsers.hasName(credentials.username)) {
                         if (user[0].password === credentials.password) {
                             // Response to client socket about login status
                             socket.emit('login', {status: true, message: 'Login succeeded.'});
@@ -173,12 +176,12 @@ server.on('connection', function(socket){
                 } else {
                     // A valid receiver
                     // * Might extend this functionality to send a message to a group of users
-
                     var newMsg = {
                         sender: activeUsers.getName(socket.id),
                         receiver: receivers[0].username,
                         message: packet.message,
-                        pushed: false
+                        pushed: false,
+                        timestamp: Date.now()
                     };
 
                     console.log(activeUsers.hasName(newMsg.receiver));
@@ -209,7 +212,10 @@ server.on('connection', function(socket){
         activeUsers.removeId(socket.id);
 
         // Notify all the connected clients of the newly logged out client
-        server.emit('activeUsers', {onlineUsers: activeUsers.users});
+        server.emit('activeUsers', {onlineUsers: activeUsers.users.reduce(
+            function (prev, cur) {
+                return prev.concat(cur.username);
+            }, [])});
     });
 });
 
