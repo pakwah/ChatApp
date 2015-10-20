@@ -5,6 +5,7 @@
 
 var ReactDOM = require('react-dom');
 var React = require('react');
+var $ = require('jquery');
 var io = require('socket.io-client');
 var LoginPage = require('./js/LoginPage.js');
 var ChatPage = require('./js/ChatPage.js');
@@ -19,12 +20,24 @@ var App = React.createClass({
       status: '',
       alertVisible: false,
       username: '',
-      activeUsers: []
+      recipient: null,
+      activeUsers: [],
+      messages: {}  // map recipient name to list of messages with that user
     }
   },
   componentDidMount: function() {
     socket.on('activeUsers', function(data) {
       this.setState({activeUsers: data.onlineUsers});
+    }.bind(this));
+    socket.on('receive', function(data) {
+      if (!this.state.messages[data.sender]) {
+        return;
+      }
+      this.setState(function(prevState, curProps) {
+        prevState = JSON.parse(JSON.stringify(prevState));
+        prevState.messages[data.sender].push(data);
+        return prevState;
+      });
     }.bind(this));
   },
   handleLogin: function(data) {
@@ -53,19 +66,49 @@ var App = React.createClass({
     var packet = {receiver: recipient, message: text};
     socket.emit('send', packet);
   },
+  getMessages: function(recipient) {
+    if (recipient === undefined || recipient === null) {
+      return [];
+    }
+    if (typeof this.state.messages[recipient] === 'undefined') {
+      var url = '/history/' + this.state.username + '/' + recipient;
+      $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          this.setState(function(prevState, curProps) {
+            prevState = JSON.parse(JSON.stringify(prevState));
+            prevState.messages[recipient] = data;
+            return prevState;
+          });
+          this.forceUpdate();
+        }.bind(this),
+        error: function(xhr, status, err) {
+          console.error(err+': '+xhr.responseText);
+        }.bind(this)
+      });
+      return [];
+    }
+    return this.state.messages[recipient];
+  },
+  handleClickUser: function(recipient) {
+    this.setState({
+      recipient: recipient
+    });
+  },
   render: function() {
     var page = null;
     if (this.state.page === 'login') {
       page = (
-        <div>
-          <LoginPage handleLogin={this.handleLogin} alertVisible={this.state.alertVisible}
-            status={this.state.status} />
-        </div>
+        <LoginPage handleLogin={this.handleLogin} alertVisible={this.state.alertVisible}
+          status={this.state.status} />
       )
     } else if (this.state.page === 'chat') {
       page = (
         <ChatPage handleMessage={this.handleSendMessage} username={this.state.username}
-          activeUsers={this.state.activeUsers} />
+          activeUsers={this.state.activeUsers} messages={this.getMessages(this.state.recipient)}
+          handleClickUser={this.handleClickUser} />
       )
     }
     return (

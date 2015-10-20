@@ -10,8 +10,6 @@ var Login = React.createClass({
       return;
     }
     this.props.handleLogin({username: username, password: password});
-    this.refs.username.value = '';
-    this.refs.password.value = '';
   },
   render: function() {
     return (

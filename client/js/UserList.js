@@ -13,10 +13,10 @@ var UserNode = React.createClass({
   render: function() {
     return (
       <RBS.NavItem eventKey={this.props.name} onSelect={this.onClick} >
-        {this.props.name} {this.props.activeUsers.indexOf(this.props.name) !== -1 ?
-          <RBS.Glyphicon glyph="asterisk"/> :
-          null
-        }
+        {this.props.activeUsers.indexOf(this.props.name) !== -1 ?
+            <RBS.Glyphicon glyph="eye-open" /> :
+            <RBS.Glyphicon glyph="eye-close" style={{color:"red"}} />
+          } {this.props.name}
       </RBS.NavItem>
     )
   }
@@ -31,7 +31,6 @@ var UserList = React.createClass({
   componentDidMount: function() {
     $.ajax({
       url: '/userList',
-      // contentType: 'application/json; charset=utf-8',
       type: 'GET',
       dataType: 'json',
       success: function(data) {
@@ -53,8 +52,8 @@ var UserList = React.createClass({
     }, this);
     return (
       <div className="userList">
-        <h2 className="text-center">Users</h2>
         <RBS.Nav bsStyle="tabs" stacked>
+          <h2 className="text-center">Users</h2>
           {userNodes}
         </RBS.Nav>
       </div>
