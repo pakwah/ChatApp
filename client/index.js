@@ -89,7 +89,6 @@ var App = React.createClass({
       } else {
         prevState.newMessages[packet.receiver].push(packet);
       }
-      console.log(prevState.newMessages);
       return prevState;
     });
   },

@@ -35,9 +35,10 @@ var MessageForm = React.createClass({
   },
   render: function() {
     return (
-      <form className="form-inline" onSubmit={this.handleSubmit}>
-        <RBS.Input type="text" placeholder="Type your message here" ref="text"/>
-        <RBS.ButtonInput type="submit" value="Post" />
+      <form onSubmit={this.handleSubmit}>
+        <RBS.Input type="text" placeholder="Type your message here" ref="text"
+          buttonAfter={<RBS.Button onClick={this.handleSubmit}>Post</RBS.Button>}
+          style={{paddingRight:"10px"}}/>
       </form>
     )
   }
@@ -47,6 +48,10 @@ var MessageList = React.createClass({
   componentWillReceiveProps: function() {
     this.forceUpdate();
   },
+  componentDidUpdate: function() {
+    var objDiv = document.getElementById("messageList");
+    objDiv.scrollTop = objDiv.scrollHeight;
+  },
   render: function() {
     var messageNodes = this.props.messages.map(function(message, index) {
       return (
@@ -54,7 +59,7 @@ var MessageList = React.createClass({
       )
     }, this);
     return (
-      <div className="pre-scrollable" style={{height:"100%"}}>
+      <div id="messageList" className="container" style={{overflowY:"scroll", maxHeight:"750px", width:"100%"}}>
         {messageNodes}
       </div>
     )
@@ -114,18 +119,16 @@ var ChatPage = React.createClass({
   render: function() {
     return (
       <div>
-        <RBS.Col md={2}>
+        <RBS.Col md={2} xs={2}>
           <UserList handleClickUser={this.handleClickUser} username={this.props.username}
             activeUsers={this.props.activeUsers} unreadCount={this.props.unreadCount} />
         </RBS.Col>
-        <RBS.Col md={10}>
+        <RBS.Col md={10} xs={10} style={{backgroundColor:"green"}}>
           <h3>{this.state.recipient}</h3>
-          <RBS.Row>
-            <MessageList messages={this.state.messages} username={this.props.username}/>
-          </RBS.Row>
-          <RBS.Row style={{position:"fixed", bottom:"5px"}}>
+          <MessageList messages={this.state.messages} username={this.props.username}/>
+          <footer style={{position:"absolute", bottom:"0", backgroundColor:"blue"}}>
             <MessageForm handleMessage={this.handleSendMessage} />
-          </RBS.Row>
+          </footer>
         </RBS.Col>
       </div>
     )
