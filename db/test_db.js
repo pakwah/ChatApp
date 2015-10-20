@@ -32,5 +32,6 @@ mongoose.connect('mongodb://localhost:27017/testDB');
 module.exports = {
     User: User,
     Message: Message,
-    mockgoose: mockgoose
+    mockgoose: mockgoose,
+    mongoose: mongoose
 }

@@ -4,6 +4,9 @@ var http = require('http').Server(app);
 var server = require('socket.io')(http);
 var db = require('./db/db.js');
 var path = require('path');
+var bodyParser = require('body-parser');
+
+app.use(bodyParser.json());
 
 // for testing purpose
 // allow swapping in a new db
@@ -57,6 +60,7 @@ app.use('/', express.static(path.join(__dirname, 'client')));
 
 // handling request to create user
 app.post('/createUser', function(req, res) {
+    console.log(req.body);
     if (req.body.username && req.body.password) {
         db.User.find({username: req.body.username}, function(err, user) {
             if (err) {
