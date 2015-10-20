@@ -2,11 +2,14 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var server = require('socket.io')(http);
-var bodyParser = require('body-parser');
 var db = require('./db/db.js');
 var path = require('path');
 
-app.use(bodyParser.json());
+// for testing purpose
+// allow swapping in a new db
+function initializeDB(dbObject) {
+    console.log("initializing: " + dbObject);
+};
 
 // maps socket id to username
 var activeUsers = {
@@ -222,10 +225,7 @@ server.on('connection', function(socket){
         activeUsers.removeId(socket.id);
 
         // Notify all the connected clients of the newly logged out client
-        server.emit('activeUsers', {onlineUsers: activeUsers.users.reduce(
-            function (prev, cur) {
-                return prev.concat(cur.username);
-            }, [])});
+        server.emit('activeUsers', {onlineUsers: activeUsers.getAllNames()});
     });
 });
 
@@ -237,5 +237,6 @@ module.exports = {
     server: http,
     close: function(cb) {
         http.close(cb);
-    }
+    },
+    initializeDB: initializeDB
 };

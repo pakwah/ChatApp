@@ -1,4 +1,8 @@
 var mongoose = require('mongoose');
+var mockgoose = require('mockgoose');
+
+// mock database
+mockgoose(mongoose);
 
 var db = mongoose.connection;
 
@@ -23,9 +27,10 @@ var messageSchema = mongoose.Schema({
 
 var Message = mongoose.model('Message', messageSchema);
 
-mongoose.connect('mongodb://localhost/appDB');
+mongoose.connect('mongodb://localhost:27017/testDB');
 
 module.exports = {
     User: User,
-    Message: Message
+    Message: Message,
+    mockgoose: mockgoose
 }
