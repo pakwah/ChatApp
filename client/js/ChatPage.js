@@ -44,27 +44,11 @@ var MessageForm = React.createClass({
 });
 
 var MessageList = React.createClass({
-  getInitialState: function() {
-    return {
-      messages: []
-    }
-  },
   componentWillReceiveProps: function() {
-    var url = '/history/' + this.props.username + '/' + this.props.recipient;
-    $.ajax({
-      url: url,
-      type: 'GET',
-      dataType: 'json',
-      success: function(data) {
-        this.setState({messages: data});
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(err+': '+xhr.responseText);
-      }.bind(this)
-    });
+    this.forceUpdate();
   },
   render: function() {
-    var messageNodes = this.state.messages.map(function(message) {
+    var messageNodes = this.props.messages.map(function(message) {
       return (
         <MessageNode message={message} key={message._id}/>
       )
@@ -80,14 +64,34 @@ var MessageList = React.createClass({
 var ChatPage = React.createClass({
   getInitialState: function() {
     return {
-      recipient: null
+      recipient: null,
+      messages: []
+    }
+  },
+  componentWillReceiveProps: function(newProps) {
+    if(newProps.unreadCount[this.state.recipient] > 0) {
+      this.props.clearUnread(this.state.recipient);
     }
   },
   handleClickUser: function(data) {
-    console.log('chatpage');
     var username = data.username;
     this.setState({recipient: username});
-    this.props.clearUnread(data.username);
+    this.updateRecipient(username);
+    this.props.clearUnread(username);
+  },
+  updateRecipient: function(recipient) {
+    var url = '/history/' + this.props.username + '/' + recipient;
+    $.ajax({
+      url: url,
+      type: 'GET',
+      dataType: 'json',
+      success: function(data) {
+        this.setState({messages: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(err+': '+xhr.responseText);
+      }.bind(this)
+    });
   },
   handleSendMessage: function(text) {
     if (this.state.recipient) {
@@ -108,7 +112,7 @@ var ChatPage = React.createClass({
         <RBS.Col md={10}>
           <h3>{this.state.recipient}</h3>
           <RBS.Row>
-            <MessageList username={this.props.username} recipient={this.state.recipient} />
+            <MessageList messages={this.state.messages} />
           </RBS.Row>
           <RBS.Row style={{position:"fixed", bottom:"5px"}}>
             <MessageForm handleMessage={this.handleSendMessage} />

@@ -46,7 +46,6 @@ var UserList = React.createClass({
     });
   },
   render: function() {
-    console.log(this.props.unreadCount);
     var userNodes = this.state.users.map(function(user, index) {
       if (user.username !== this.props.username) {
         return (
