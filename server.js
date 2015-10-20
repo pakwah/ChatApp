@@ -197,7 +197,8 @@ server.on('connection', function(socket){
                     if (activeUsers.hasName(newMsg.receiver)) {
                         // persist to database -> message history
                         // set pushed status to true
-                        server.to(activeUsers.getId(newMsg.receiver)).emit('receive', {sender: sender, message: packet.message});
+                        server.to(activeUsers.getId(newMsg.receiver)).emit('receive',
+                            {sender: sender, message: packet.message, timestamp: newMsg.timestamp});
                         newMsg.pushed = true;
                     }
 
@@ -230,3 +231,10 @@ server.on('connection', function(socket){
 http.listen(3000, function(){
     console.log('Listening on port 3000');
 });
+
+module.exports = {
+    server: http,
+    close: function(cb) {
+        http.close(cb);
+    }
+};
