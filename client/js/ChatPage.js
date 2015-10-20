@@ -17,7 +17,7 @@ var MessageNode = React.createClass({
           <b>{this.props.message.sender} </b>
           <i>{timestamp.toLocaleString()}</i>
         </span>
-        <div>{this.props.message.message}</div>
+        <div style={{fontSize:"20px"}}>{this.props.message.message}</div>
       </div>
     )
   }
@@ -59,7 +59,7 @@ var MessageList = React.createClass({
       )
     }, this);
     return (
-      <div id="messageList" className="container" style={{overflowY:"scroll", maxHeight:"750px", width:"100%"}}>
+      <div id="messageList" className="container" style={{overflowY:"auto", maxHeight:"750px", width:"100%"}}>
         {messageNodes}
       </div>
     )
@@ -123,10 +123,10 @@ var ChatPage = React.createClass({
           <UserList handleClickUser={this.handleClickUser} username={this.props.username}
             activeUsers={this.props.activeUsers} unreadCount={this.props.unreadCount} />
         </RBS.Col>
-        <RBS.Col md={10} xs={10} style={{backgroundColor:"green"}}>
+        <RBS.Col md={10} xs={10}>
           <h3>{this.state.recipient}</h3>
           <MessageList messages={this.state.messages} username={this.props.username}/>
-          <footer style={{position:"absolute", bottom:"0", backgroundColor:"blue"}}>
+          <footer style={{position:"fixed", bottom:"0"}}>
             <MessageForm handleMessage={this.handleSendMessage} />
           </footer>
         </RBS.Col>
