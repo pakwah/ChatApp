@@ -21,7 +21,8 @@ var App = React.createClass({
       alertVisible: false,
       username: '',
       activeUsers: [],
-      unreadCount: {}
+      unreadCount: {},
+      newMessages: {}
     }
   },
   componentDidMount: function() {
@@ -34,6 +35,11 @@ var App = React.createClass({
           prevState.unreadCount[data.sender] = 1;
         } else {
           prevState.unreadCount[data.sender]++;
+        }
+        if(prevState.newMessages[data.sender] === undefined) {
+          prevState.newMessages[data.sender] = [data];
+        } else {
+          prevState.newMessages[data.sender].push(data);
         }
         return prevState;
       });
@@ -64,6 +70,12 @@ var App = React.createClass({
       return prevState;
     });
   },
+  clearNewMessages: function(username) {
+    this.setState(function(prevState, curProps) {
+      prevState.newMessages[username] = [];
+      return prevState;
+    });
+  },
   handleSendMessage: function(data) {
     var recipient = data.recipient;
     var text = data.text;
@@ -81,7 +93,8 @@ var App = React.createClass({
       page = (
         <ChatPage handleMessage={this.handleSendMessage} username={this.state.username}
           activeUsers={this.state.activeUsers} unreadCount={this.state.unreadCount}
-          clearUnread={this.clearUnread} />
+          clearUnread={this.clearUnread} newMessages={this.state.newMessages}
+          clearNewMessages={this.clearNewMessages} />
       )
     }
     return (

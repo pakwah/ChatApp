@@ -54,7 +54,7 @@ var MessageList = React.createClass({
       )
     }, this);
     return (
-      <div>
+      <div className="pre-scrollable" style={{height:"100%"}}>
         {messageNodes}
       </div>
     )
@@ -72,6 +72,14 @@ var ChatPage = React.createClass({
     if(newProps.unreadCount[this.state.recipient] > 0) {
       this.props.clearUnread(this.state.recipient);
     }
+    var newMessages = newProps.newMessages[this.state.recipient];
+    if(typeof newMessages !== 'undefined' && newMessages.length > 0) {
+        this.setState(function(prevState, curProps) {
+          prevState.messages = prevState.messages.concat(newMessages);
+          return prevState;
+        });
+        this.props.clearNewMessages(this.state.recipient);
+      }
   },
   handleClickUser: function(data) {
     var username = data.username;
@@ -86,6 +94,7 @@ var ChatPage = React.createClass({
       type: 'GET',
       dataType: 'json',
       success: function(data) {
+        this.props.clearNewMessages(this.props.username);
         this.setState({messages: data});
       }.bind(this),
       error: function(xhr, status, err) {
