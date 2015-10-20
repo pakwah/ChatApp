@@ -48,9 +48,9 @@ var MessageList = React.createClass({
     this.forceUpdate();
   },
   render: function() {
-    var messageNodes = this.props.messages.map(function(message) {
+    var messageNodes = this.props.messages.map(function(message, index) {
       return (
-        <MessageNode message={message} key={message._id}/>
+        <MessageNode message={message} key={index}/>
       )
     }, this);
     return (
@@ -121,7 +121,7 @@ var ChatPage = React.createClass({
         <RBS.Col md={10}>
           <h3>{this.state.recipient}</h3>
           <RBS.Row>
-            <MessageList messages={this.state.messages} />
+            <MessageList messages={this.state.messages} username={this.props.username}/>
           </RBS.Row>
           <RBS.Row style={{position:"fixed", bottom:"5px"}}>
             <MessageForm handleMessage={this.handleSendMessage} />

@@ -81,6 +81,17 @@ var App = React.createClass({
     var text = data.text;
     var packet = {receiver: recipient, message: text};
     socket.emit('send', packet);
+    packet.sender = this.state.username;
+    packet.timestamp = Date.now();
+    this.setState(function(prevState, curProps) {
+      if(typeof prevState.newMessages[packet.receiver] === 'undefined') {
+        prevState.newMessages[packet.receiver] = [packet];
+      } else {
+        prevState.newMessages[packet.receiver].push(packet);
+      }
+      console.log(prevState.newMessages);
+      return prevState;
+    });
   },
   render: function() {
     var page = null;
