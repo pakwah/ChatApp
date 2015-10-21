@@ -12,13 +12,13 @@ var MessageNode = React.createClass({
   render: function() {
     var timestamp = new Date(this.props.message.timestamp);
     return (
-      <li>
+      <div>
         <span>
           <b>{this.props.message.sender} </b>
           <i>{timestamp.toLocaleString()}</i>
         </span>
-        <div>{this.props.message.message}</div>
-      </li>
+        <div style={{fontSize:"20px"}}>{this.props.message.message}</div>
+      </div>
     )
   }
 });
@@ -27,7 +27,6 @@ var MessageForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
     var text = this.refs.text.getValue().trim();
-    console.log(text);
     if (!text) {
       return;
     }
@@ -36,23 +35,31 @@ var MessageForm = React.createClass({
   },
   render: function() {
     return (
-      <form className="form-inline" onSubmit={this.handleSubmit}>
-        <RBS.Input type="text" placeholder="Type your message here" ref="text"/>
-        <RBS.ButtonInput type="submit" value="Post" />
+      <form onSubmit={this.handleSubmit}>
+        <RBS.Input type="text" placeholder="Type your message here" ref="text"
+          buttonAfter={<RBS.Button onClick={this.handleSubmit}>Post</RBS.Button>}
+          style={{paddingRight:"10px"}}/>
       </form>
     )
   }
 });
 
 var MessageList = React.createClass({
+  componentWillReceiveProps: function() {
+    this.forceUpdate();
+  },
+  componentDidUpdate: function() {
+    var objDiv = document.getElementById("messageList");
+    objDiv.scrollTop = objDiv.scrollHeight;
+  },
   render: function() {
-    var messageNodes = this.props.data.map(function(d) {
+    var messageNodes = this.props.messages.map(function(message, index) {
       return (
-        <MessageNode message={d} key={d._id}/>
+        <MessageNode message={message} key={index}/>
       )
-    });
+    }, this);
     return (
-      <div>
+      <div id="messageList" className="container" style={{overflowY:"auto", maxHeight:"750px", width:"100%"}}>
         {messageNodes}
       </div>
     )
@@ -62,13 +69,43 @@ var MessageList = React.createClass({
 var ChatPage = React.createClass({
   getInitialState: function() {
     return {
-      recipient: null
+      recipient: null,
+      messages: []
     }
+  },
+  componentWillReceiveProps: function(newProps) {
+    if(newProps.unreadCount[this.state.recipient] > 0) {
+      this.props.clearUnread(this.state.recipient);
+    }
+    var newMessages = newProps.newMessages[this.state.recipient];
+    if(typeof newMessages !== 'undefined' && newMessages.length > 0) {
+        this.setState(function(prevState, curProps) {
+          prevState.messages = prevState.messages.concat(newMessages);
+          return prevState;
+        });
+        this.props.clearNewMessages(this.state.recipient);
+      }
   },
   handleClickUser: function(data) {
     var username = data.username;
-    this.props.handleClickUser(username);
     this.setState({recipient: username});
+    this.updateRecipient(username);
+    this.props.clearUnread(username);
+  },
+  updateRecipient: function(recipient) {
+    var url = '/history/' + this.props.username + '/' + recipient;
+    $.ajax({
+      url: url,
+      type: 'GET',
+      dataType: 'json',
+      success: function(data) {
+        this.props.clearNewMessages(this.props.username);
+        this.setState({messages: data});
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(err+': '+xhr.responseText);
+      }.bind(this)
+    });
   },
   handleSendMessage: function(text) {
     if (this.state.recipient) {
@@ -82,18 +119,16 @@ var ChatPage = React.createClass({
   render: function() {
     return (
       <div>
-        <RBS.Col md={2}>
+        <RBS.Col md={2} xs={2}>
           <UserList handleClickUser={this.handleClickUser} username={this.props.username}
-            activeUsers={this.props.activeUsers} />
+            activeUsers={this.props.activeUsers} unreadCount={this.props.unreadCount} />
         </RBS.Col>
-        <RBS.Col md={10}>
+        <RBS.Col md={10} xs={10}>
           <h3>{this.state.recipient}</h3>
-          <RBS.Row>
-            <MessageList data={this.props.messages} />
-          </RBS.Row>
-          <RBS.Row style={{position:"fixed", bottom:"5px"}}>
+          <MessageList messages={this.state.messages} username={this.props.username}/>
+          <footer style={{position:"fixed", bottom:"0"}}>
             <MessageForm handleMessage={this.handleSendMessage} />
-          </RBS.Row>
+          </footer>
         </RBS.Col>
       </div>
     )

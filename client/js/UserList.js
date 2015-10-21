@@ -14,9 +14,13 @@ var UserNode = React.createClass({
     return (
       <RBS.NavItem eventKey={this.props.name} onSelect={this.onClick} >
         {this.props.activeUsers.indexOf(this.props.name) !== -1 ?
-            <RBS.Glyphicon glyph="eye-open" /> :
-            <RBS.Glyphicon glyph="eye-close" style={{color:"red"}} />
-          } {this.props.name}
+          <RBS.Glyphicon glyph="eye-open" /> :
+          <RBS.Glyphicon glyph="eye-close" style={{color:"red"}} />
+        } {this.props.name}
+        {this.props.unreadCount > 0 ?
+          <RBS.Badge>{this.props.unreadCount}</RBS.Badge> :
+          null
+        }
       </RBS.NavItem>
     )
   }
@@ -46,7 +50,7 @@ var UserList = React.createClass({
       if (user.username !== this.props.username) {
         return (
           <UserNode name={user.username} handleClickUser={this.props.handleClickUser} key={index}
-            activeUsers={this.props.activeUsers} />
+            activeUsers={this.props.activeUsers} unreadCount={this.props.unreadCount[user.username]}/>
         );
       }
     }, this);

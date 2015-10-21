@@ -236,15 +236,6 @@ server.on('connection', function(socket){
     });
 });
 
-http.listen(3000, function(){
+module.exports = http.listen(3000, function(){
     console.log('Listening on port 3000');
 });
-
-module.exports = {
-    server: http,
-    close: function(cb) {
-        http.close(cb);
-    },
-    initializeDB: initializeDB,
-    db: db
-};

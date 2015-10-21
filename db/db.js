@@ -1,5 +1,3 @@
-var dbURI = /*process.env.MONGOHQ_URL ||*/ 'mongodb://localhost/appDB';
-
 var mongoose = require('mongoose');
 
 var db = mongoose.connection;
@@ -25,10 +23,10 @@ var messageSchema = mongoose.Schema({
 
 var Message = mongoose.model('Message', messageSchema);
 
-mongoose.connect(dbURI, function() {console.log('connecting to: ' + dbURI)});
+var dbURI = process.env.NODE_ENV === "test" ? 'mongodb://localhost/appDBTest' : 'mongodb://localhost/appDB';
+mongoose.connect(dbURI, function() {console.log('connecting to: ' + dbURI);});
 
 module.exports = {
     User: User,
-    Message: Message,
-    mongoose: mongoose
+    Message: Message
 };
