@@ -222,6 +222,11 @@ describe('MessageForm', function() {
   });
 });
 
+describe('UserNode', function() {
+  var UserNode = require('../client/js/UserNode.js');
+
+});
+
 describe('MessageNode', function() {
   var MessageNode = require('../client/js/MessageNode');
 
