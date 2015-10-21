@@ -174,6 +174,43 @@ describe('CreateUser', function() {
   });
 });
 
+describe('MessageForm', function() {
+  var MessageForm = require('../client/js/MessageForm');
+
+  it('should submit message upon submission', function() {
+    var submit = sinon.spy();
+    var messageForm = TestUtils.renderIntoDocument(
+      <MessageForm handleMessage={submit} />
+    );
+    var form = TestUtils.findRenderedDOMComponentWithTag(messageForm, 'form');
+    messageForm.refs.text.getInputDOMNode().value = 'message';
+    TestUtils.Simulate.submit(form);
+    expect(submit).to.have.been.calledWith('message');
+  });
+
+  it('should trim whitespace at end', function() {
+    var submit = sinon.spy();
+    var messageForm = TestUtils.renderIntoDocument(
+      <MessageForm handleMessage={submit} />
+    );
+    var form = TestUtils.findRenderedDOMComponentWithTag(messageForm, 'form');
+    messageForm.refs.text.getInputDOMNode().value = 'message    ';
+    TestUtils.Simulate.submit(form);
+    expect(submit).to.have.been.calledWith('message');
+  });
+
+  it('should not call handleSubmit if message empty', function() {
+    var submit = sinon.spy();
+    var messageForm = TestUtils.renderIntoDocument(
+      <MessageForm handleMessage={submit} />
+    );
+    var form = TestUtils.findRenderedDOMComponentWithTag(messageForm, 'form');
+    messageForm.refs.text.getInputDOMNode().value = '';
+    TestUtils.Simulate.submit(form);
+    expect(submit).to.not.have.been.called;
+  });
+});
+
 describe('UserNode', function() {
   var UserNode = require('../client/js/UserNode.js');
 

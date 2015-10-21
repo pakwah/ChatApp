@@ -20,5 +20,4 @@ global.reactModulesToStub = ['../client/js/UserList.js'];
 describe('ChatPage', function() {
   var ChatPage = require('../client/js/ChatPage.js')
 
-  it('')
 });
