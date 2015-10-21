@@ -1,3 +1,4 @@
+/* Begin common test header */
 // Create a fake global `window` and `document` object:
 require('./testdom')('<html><body></body></html>');
 
@@ -9,7 +10,9 @@ chai.use(sinonChai);
 var React = require('react');
 var TestUtils = require('react-addons-test-utils');
 
+// add anything that you want to stub
 global.reactModulesToStub = [];
+/* End common test header */
 
 describe('General Tests', function() {
   it('should pass an empty test', function() {
@@ -86,22 +89,43 @@ describe('Login', function() {
 
 describe('CreateUser', function() {
   var CreateUser = require('../client/js/CreateUser.js');
-  var server;
+  var $ = require('jquery');
   var createForm;
+  var server;
 
   beforeEach(function() {
+    createForm = TestUtils.renderIntoDocument(<CreateUser />);
     sinon.xhr.supportsCORS = true;
     server = sinon.fakeServer.create();
-    createForm = TestUtils.renderIntoDocument(<CreateUser />);
   });
 
   afterEach(function () {
     server.restore();
   });
 
+  it('should not submit if username is blank', function() {
+    var fakeAjax = sinon.stub($, "ajax");
+
+    var form = TestUtils.findRenderedDOMComponentWithTag(createForm, 'form');
+    createForm.refs.password.getInputDOMNode().value = 'p1';
+    TestUtils.Simulate.submit(form);
+    expect(fakeAjax).to.have.not.been.called;
+    fakeAjax.restore();
+  });
+
+  it('should not submit if password is blank', function() {
+    var fakeAjax = sinon.stub($, "ajax");
+
+    var form = TestUtils.findRenderedDOMComponentWithTag(createForm, 'form');
+    createForm.refs.username.getInputDOMNode().value = 'u1';
+    TestUtils.Simulate.submit(form);
+    expect(fakeAjax).to.have.not.been.called;
+    fakeAjax.restore();
+  });
+
   it('should let the user know they registered successfully', function() {
-    server.respondWith('POST', '/createUser', [200, { "Content-Type": "text/html",
-                                                    "Content-Length": 2 }, "OK"]);
+    server.respondWith('POST', '/createUser', [200, {"Content-Type": "text/html",
+                                                    "Content-Length": 2}, "OK"]);
     server.respondImmediately = true;
 
     var form = TestUtils.findRenderedDOMComponentWithTag(createForm, 'form');
@@ -115,5 +139,23 @@ describe('CreateUser', function() {
     var alert = TestUtils.findRenderedDOMComponentWithClass(createForm, 'alert');
     expect(alert.props.bsStyle).to.equal('success');
     expect(alert.textContent).to.equal('Successfully registered');
+  });
+
+  it('should alert the user if registration failed', function() {
+    server.respondWith('POST', '/createUser', [400, {"Content-Type": "text/html"},
+                                                    "Username already exists"]);
+    server.respondImmediately = true;
+
+    var form = TestUtils.findRenderedDOMComponentWithTag(createForm, 'form');
+    createForm.refs.username.getInputDOMNode().value = 'u1';
+    createForm.refs.password.getInputDOMNode().value = 'p1';
+
+    // no alert should be visible initially
+    expect(TestUtils.scryRenderedDOMComponentsWithClass(createForm, 'alert')).to.be.empty;
+    TestUtils.Simulate.submit(form);
+
+    var alert = TestUtils.findRenderedDOMComponentWithClass(createForm, 'alert');
+    expect(alert.props.bsStyle).to.equal('danger');
+    expect(alert.textContent).to.equal('Username already exists');
   });
 });
