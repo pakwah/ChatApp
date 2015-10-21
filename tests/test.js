@@ -173,3 +173,8 @@ describe('CreateUser', function() {
     expect(alert.textContent).to.equal('Username already exists');
   });
 });
+
+describe('UserNode', function() {
+  var UserNode = require('../client/js/UserNode.js');
+
+});
