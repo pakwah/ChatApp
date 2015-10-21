@@ -10,7 +10,6 @@ var React = require('react');
 var TestUtils = require('react-addons-test-utils');
 
 global.reactModulesToStub = [];
-var Login = require('../client/js/Login.js');
 
 describe('General Tests', function() {
   it('should pass an empty test', function() {
@@ -19,6 +18,8 @@ describe('General Tests', function() {
 });
 
 describe('Login', function() {
+  var Login = require('../client/js/Login.js');
+
   it('should submit credentials upon form submission', function() {
     var submit = sinon.spy();
     var loginForm = TestUtils.renderIntoDocument(
@@ -80,5 +81,18 @@ describe('Login', function() {
     loginForm.refs.password.getInputDOMNode().value = ' p1 ';
     TestUtils.Simulate.submit(form);
     expect(submit).to.have.been.calledWith({username:'u1', password:'p1'});
+  });
+});
+
+describe('CreateUser', function() {
+  var CreateUser = require('../client/js/CreateUser.js');
+  var server;
+
+  beforeEach(function() {
+    server = sinon.fakeServer.create();
+  });
+
+  afterEach(function () {
+    server.restore();
   });
 });
