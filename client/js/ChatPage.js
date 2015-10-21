@@ -7,64 +7,8 @@ var $ = require('jquery');
 var RBS = require('react-bootstrap');
 
 var UserList = require('./UserList');
-
-var MessageNode = React.createClass({
-  render: function() {
-    var timestamp = new Date(this.props.message.timestamp);
-    return (
-      <div>
-        <span>
-          <b>{this.props.message.sender} </b>
-          <i>{timestamp.toLocaleString()}</i>
-        </span>
-        <div style={{fontSize:"20px"}}>{this.props.message.message}</div>
-      </div>
-    )
-  }
-});
-
-var MessageForm = React.createClass({
-  handleSubmit: function(e) {
-    e.preventDefault();
-    var text = this.refs.text.getValue().trim();
-    if (!text) {
-      return;
-    }
-    this.refs.text.getInputDOMNode().value = '';
-    this.props.handleMessage(text);
-  },
-  render: function() {
-    return (
-      <form onSubmit={this.handleSubmit}>
-        <RBS.Input type="text" placeholder="Type your message here" ref="text"
-          buttonAfter={<RBS.Button onClick={this.handleSubmit}>Post</RBS.Button>}
-          style={{paddingRight:"10px"}}/>
-      </form>
-    )
-  }
-});
-
-var MessageList = React.createClass({
-  componentWillReceiveProps: function() {
-    this.forceUpdate();
-  },
-  componentDidUpdate: function() {
-    var objDiv = document.getElementById("messageList");
-    objDiv.scrollTop = objDiv.scrollHeight;
-  },
-  render: function() {
-    var messageNodes = this.props.messages.map(function(message, index) {
-      return (
-        <MessageNode message={message} key={index}/>
-      )
-    }, this);
-    return (
-      <div id="messageList" className="container" style={{overflowY:"auto", maxHeight:"750px", width:"100%"}}>
-        {messageNodes}
-      </div>
-    )
-  }
-});
+var MessageForm = require('./MessageForm');
+var MessageList = require('./MessageList');
 
 var ChatPage = React.createClass({
   getInitialState: function() {
