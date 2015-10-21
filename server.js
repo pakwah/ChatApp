@@ -12,6 +12,7 @@ app.use(bodyParser.json());
 // allow swapping in a new db
 function initializeDB(dbObject) {
     console.log("initializing: " + dbObject);
+    db = dbObject;
 };
 
 // maps socket id to username
@@ -60,7 +61,7 @@ app.use('/', express.static(path.join(__dirname, 'client')));
 
 // handling request to create user
 app.post('/createUser', function(req, res) {
-    console.log(req.body);
+    //console.log(req.body);
     if (req.body.username && req.body.password) {
         db.User.find({username: req.body.username}, function(err, user) {
             if (err) {
@@ -116,10 +117,12 @@ app.get('/history/:sender/:receiver', function(req, res) {
 });
 
 app.get('/userList', function(req, res) {
-    db.User.find({}, 'username', function (err, userList) {
+    console.log('getting list of users');
+    db.User.find({}, function (err, userList) {
         if (err) {
             res.status(500).send('Error obtaining the list of registered users from the database, error: ' + err);
         } else {
+            console.log(userList);
             res.status(200).send(userList);
         }
     });
@@ -242,5 +245,6 @@ module.exports = {
     close: function(cb) {
         http.close(cb);
     },
-    initializeDB: initializeDB
+    initializeDB: initializeDB,
+    db: db
 };

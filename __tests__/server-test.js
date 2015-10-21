@@ -1,22 +1,11 @@
-require = require('really-need');
+//var require = require('really-need');
+require('./common.js');
 var expect = require('chai').expect;
 var request = require('supertest');
-var mongoose = require('mongoose');
-var mockgoose = require('mockgoose');
-var test_db = require('../db/test_db');
+
+var test_server = require('../server.js');
 
 describe('server tests', function() {
-    var test_server;
-
-    beforeEach(function() {
-       test_server = require('../server.js', {bustCache: true});
-       test_server.initializeDB(test_db);
-    });
-
-    afterEach(function(done) {
-        test_server.close(done);
-    });
-
     it('server should be open to connections', function(done) {
         request(test_server.server)
         .get('/')
@@ -25,11 +14,13 @@ describe('server tests', function() {
 
     // route to create users
     describe('createUser', function() {
-        it('should create a user in the database', function() {
+        it('should get the userlist', function(done) {
             request(test_server.server)
             .get('/userList')
             .end(function(err, res, body) {
-                    console.log(body);
+                    console.log("test trying to obtain user list");
+                    console.log(res.body);
+                    done();
                 });
         });
     });
