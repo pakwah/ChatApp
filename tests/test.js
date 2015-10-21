@@ -199,6 +199,17 @@ describe('MessageForm', function() {
     expect(submit).to.have.been.calledWith('message');
   });
 
+  it('should trim whitespace at beginning', function() {
+    var submit = sinon.spy();
+    var messageForm = TestUtils.renderIntoDocument(
+      <MessageForm handleMessage={submit} />
+    );
+    var form = TestUtils.findRenderedDOMComponentWithTag(messageForm, 'form');
+    messageForm.refs.text.getInputDOMNode().value = '   message';
+    TestUtils.Simulate.submit(form);
+    expect(submit).to.have.been.calledWith('message');
+  });
+
   it('should not call handleSubmit if message empty', function() {
     var submit = sinon.spy();
     var messageForm = TestUtils.renderIntoDocument(
