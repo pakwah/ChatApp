@@ -123,6 +123,20 @@ describe('CreateUser', function() {
     fakeAjax.restore();
   });
 
+  it('should remove leading/trailing whitespace from username and password', function() {
+    var fakeAjaxData = sinon.spy();
+    var fakeAjax = sinon.stub($, "ajax", function(args) {
+      fakeAjaxData(args.data);
+    });
+
+    var form = TestUtils.findRenderedDOMComponentWithTag(createForm, 'form');
+    createForm.refs.username.getInputDOMNode().value = ' u1 ';
+    createForm.refs.password.getInputDOMNode().value = ' p1 ';
+    TestUtils.Simulate.submit(form);
+    expect(fakeAjaxData).to.have.been.calledWith(JSON.stringify({username: 'u1', password: 'p1'}));
+    fakeAjax.restore();
+  });
+
   it('should let the user know they registered successfully', function() {
     server.respondWith('POST', '/createUser', [200, {"Content-Type": "text/html",
                                                     "Content-Length": 2}, "OK"]);
