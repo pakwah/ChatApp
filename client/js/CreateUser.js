@@ -23,7 +23,6 @@ var CreateUser = React.createClass({
       type: 'POST',
       data: JSON.stringify({username: username, password: password}),
       success: function(data) {
-        console.log('success');
         this.setState({
           status: 'Successfully registered',
           alertStyle: 'success',

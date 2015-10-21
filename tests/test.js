@@ -87,12 +87,33 @@ describe('Login', function() {
 describe('CreateUser', function() {
   var CreateUser = require('../client/js/CreateUser.js');
   var server;
+  var createForm;
 
   beforeEach(function() {
+    sinon.xhr.supportsCORS = true;
     server = sinon.fakeServer.create();
+    createForm = TestUtils.renderIntoDocument(<CreateUser />);
   });
 
   afterEach(function () {
     server.restore();
+  });
+
+  it('should let the user know they registered successfully', function() {
+    server.respondWith('POST', '/createUser', [200, { "Content-Type": "text/html",
+                                                    "Content-Length": 2 }, "OK"]);
+    server.respondImmediately = true;
+
+    var form = TestUtils.findRenderedDOMComponentWithTag(createForm, 'form');
+    createForm.refs.username.getInputDOMNode().value = 'u1';
+    createForm.refs.password.getInputDOMNode().value = 'p1';
+
+    // no alert should be visible initially
+    expect(TestUtils.scryRenderedDOMComponentsWithClass(createForm, 'alert')).to.be.empty;
+    TestUtils.Simulate.submit(form);
+
+    var alert = TestUtils.findRenderedDOMComponentWithClass(createForm, 'alert');
+    expect(alert.props.bsStyle).to.equal('success');
+    expect(alert.textContent).to.equal('Successfully registered');
   });
 });
