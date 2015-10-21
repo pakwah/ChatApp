@@ -10,7 +10,7 @@ var MessageNode = React.createClass({
     return (
       <div>
         <span>
-          <b>{this.props.message.sender} </b>
+          <b>{this.props.message.sender}</b>
           <i>{timestamp.toLocaleString()}</i>
         </span>
         <div style={{fontSize:"20px"}}>{this.props.message.message}</div>

@@ -221,3 +221,23 @@ describe('MessageForm', function() {
     expect(submit).to.not.have.been.called;
   });
 });
+
+describe('MessageNode', function() {
+  var MessageNode = require('../client/js/MessageNode');
+
+  it('should render component with timestamp on it', function() {
+    var shallowRenderer = TestUtils.createRenderer();
+    shallowRenderer.render(
+      <MessageNode message={{timestamp: 100, sender: 'u1'}}/>
+    );
+    var output = shallowRenderer.getRenderOutput();
+    expect(output.type).to.equal('div');
+    expect(output.props.children.length).to.equal(2);
+    expect(output.props.children[0].type).to.equal('span');
+    expect(output.props.children[0]).to.deep.equal(
+      <span><b>{'u1'}</b><i>{"12/31/1969, 6:00:00 PM"}</i></span>
+    );
+    expect(output.props.children[1].type).to.equal('div');
+    expect(output.props.children[1].children).to.be.undefined;
+  });
+});
