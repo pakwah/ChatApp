@@ -23,9 +23,10 @@ var messageSchema = mongoose.Schema({
 
 var Message = mongoose.model('Message', messageSchema);
 
-mongoose.connect('mongodb://localhost/appDB');
+var dbAddr = process.env.NODE_ENV === "test" ? 'mongodb://localhost/appDBTest' : 'mongodb://localhost/appDB';
+mongoose.connect(dbAddr);
 
 module.exports = {
     User: User,
     Message: Message
-}
+};
