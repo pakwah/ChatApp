@@ -225,6 +225,43 @@ describe('MessageForm', function() {
 describe('UserNode', function() {
   var UserNode = require('../client/js/UserNode.js');
 
+  it('should call the callback when a user is clicked', function() {
+    var callback = sinon.spy();
+    var node = TestUtils.renderIntoDocument(<UserNode name="Joe" handleClickUser={callback} key="9"
+      activeUsers={[]} unreadCount={0}/>);
+    var navItem = TestUtils.findRenderedDOMComponentWithTag(node, 'li');
+    TestUtils.Simulate.select(navItem);
+    expect(callback).to.have.been.calledWith({username: "Joe"});
+  });
+
+  it('should display the correct indicator if a user is online', function() {
+    var onlineUsers = ['Mike', 'Joe'];
+    var node = TestUtils.renderIntoDocument(<UserNode name="Joe" handleClickUser={sinon.stub()} key="9"
+      activeUsers={onlineUsers} unreadCount={0}/>);
+    var glyphicon = TestUtils.findRenderedDOMComponentWithClass(node, 'glyphicon');
+    expect(glyphicon.props.glyph).to.equal('eye-open');
+  });
+
+  it('should display the correct indicator if a user is offline', function() {
+    var onlineUsers = ['Mike', 'Dan'];
+    var node = TestUtils.renderIntoDocument(<UserNode name="Joe" handleClickUser={sinon.stub()} key="9"
+      activeUsers={onlineUsers} unreadCount={0}/>);
+    var glyphicon = TestUtils.findRenderedDOMComponentWithClass(node, 'glyphicon');
+    expect(glyphicon.props.glyph).to.equal('eye-close');
+  });
+
+  it('should not display the unread badge when there are no unread messages', function() {
+    var node = TestUtils.renderIntoDocument(<UserNode name="Joe" handleClickUser={sinon.stub()} key="9"
+      activeUsers={[]} unreadCount={0}/>);
+    expect(TestUtils.scryRenderedDOMComponentsWithClass(node, 'badge')).to.be.empty;
+  });
+
+  it('should display the unread count when there are unread messages', function() {
+    var node = TestUtils.renderIntoDocument(<UserNode name="Joe" handleClickUser={sinon.stub()} key="9"
+      activeUsers={[]} unreadCount={2}/>);
+    var badge = TestUtils.findRenderedDOMComponentWithClass(node, 'badge');
+    expect(badge.textContent).to.equal('2');
+  });
 });
 
 describe('MessageNode', function() {
