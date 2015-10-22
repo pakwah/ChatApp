@@ -8,13 +8,6 @@ var bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
 
-// for testing purpose
-// allow swapping in a new db
-function initializeDB(dbObject) {
-    console.log("initializing: " + dbObject);
-    db = dbObject;
-};
-
 // maps socket id to username
 var activeUsers = {
     users: [],
@@ -84,7 +77,7 @@ app.post('/createUser', function(req, res) {
                         // Notify all the connected clients of the user list
                         db.User.find({}, function (err, userList) {
                             if (err) {
-                                res.status(500).send('Error obtaining the list of registered users from the database, error: ' + err);
+                                console.log('Error obtaining the list of registered users from the database, error: ' + err);
                             } else {
                                 server.emit('registeredUsers', userList);
                             }
@@ -117,12 +110,10 @@ app.get('/history/:sender/:receiver', function(req, res) {
 });
 
 app.get('/userList', function(req, res) {
-    console.log('getting list of users');
     db.User.find({}, function (err, userList) {
         if (err) {
             res.status(500).send('Error obtaining the list of registered users from the database, error: ' + err);
         } else {
-            console.log(userList);
             res.status(200).send(userList);
         }
     });
@@ -185,7 +176,6 @@ server.on('connection', function(socket){
 
     socket.on('send', function(packet){
         var sender = activeUsers.getName(socket.id);
-        console.log(packet);
         db.User.find({username: packet.receiver}, function(err, receivers) {
             if (err) {
                 socket.emit('error', 'Error in searching for the receiver in the database: ' + err);
@@ -203,8 +193,6 @@ server.on('connection', function(socket){
                         timestamp: Date.now()
                     };
 
-                    console.log(activeUsers.hasName(newMsg.receiver));
-
                     if (activeUsers.hasName(newMsg.receiver)) {
                         // persist to database -> message history
                         // set pushed status to true
@@ -220,9 +208,12 @@ server.on('connection', function(socket){
                             console.log('Unable to persist the message in the db, please try again: ' + err);
                         } else {
                             console.log('Successfully persisted the message from ' + sender + ' to ' + newMsg.receiver
-                                + ' to the db.');
+                                + ' to the db.' + newMsg.pushed);
                         }
                     });
+
+                    // for testing purposes
+                    socket.emit('sent', 'message sent');
                 }
             }
         });
@@ -236,6 +227,12 @@ server.on('connection', function(socket){
     });
 });
 
-module.exports = http.listen(3000, function(){
+http.listen(3000, function(){
     console.log('Listening on port 3000');
 });
+
+
+module.exports = {
+    server: http,
+    db: db
+};
