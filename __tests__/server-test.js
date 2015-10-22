@@ -2,6 +2,7 @@ var require = require('really-need');
 process.env.NODE_ENV = "test";
 var request = require('supertest');
 var expect = require('chai').expect;
+var clearDB = require('mocha-mongoose')('mongodb://localhost/appDBTest');
 
 // route to create users
 describe('createUser', function() {
@@ -13,9 +14,10 @@ describe('createUser', function() {
 
     afterEach(function(done) {
         test_server.server.close();
-        test_server.db.User.remove({}, function() {
-            test_server.db.Message.remove({}, done);
-        });
+        //test_server.db.User.remove({}, function() {
+        //    test_server.db.Message.remove({}, done);
+        //});
+        clearDB(done);
     });
 
     it('should create a user', function(done) {
@@ -42,9 +44,10 @@ describe('message history', function() {
 
     afterEach(function(done) {
         test_server.server.close();
-        test_server.db.User.remove({}, function() {
-            test_server.db.Message.remove({}, done);
-        });
+        //test_server.db.User.remove({}, function() {
+        //    test_server.db.Message.remove({}, done);
+        //});
+        clearDB(done);
     });
 
 
@@ -107,16 +110,17 @@ describe('userList', function() {
 
     beforeEach(function(done) {
         test_server = require('../server.js', {bustCache: true});
-        test_server.db.User.remove({}, function() {
-            test_server.db.Message.remove({}, done);
-        });
+        //test_server.db.User.remove({}, function() {
+        //    test_server.db.Message.remove({}, done);
+        //});
     });
 
     afterEach(function(done) {
         test_server.server.close();
-        test_server.db.User.remove({}, function() {
-            test_server.db.Message.remove({}, done);
-        });
+        //test_server.db.User.remove({}, function() {
+        //    test_server.db.Message.remove({}, done);
+        //});
+        clearDB(done);
     });
 
     it('should get the userlist', function(done) {
@@ -150,16 +154,15 @@ describe('socket login', function() {
 
     beforeEach(function(done) {
         test_server = require('../server.js', {bustCache: true});
-        test_server.db.User.remove({}, function() {
-            test_server.db.Message.remove({}, done);
-        });
+        //test_server.db.User.remove({}, function() {
+        //    test_server.db.Message.remove({}, done);
+        //});
     });
 
     afterEach(function(done) {
         test_server.server.close(function() {
-            test_server.db.User.remove({}, function() {
-                test_server.db.Message.remove({}, done);
-        })});
+            clearDB(done)
+        });
 
     });
 
@@ -182,24 +185,25 @@ describe('socket login', function() {
             });
     });
 
-    //it('should correctly log in', function(done) {
-    //    request(test_server.server)
-    //        .post('/createUser')
-    //        .set('Content-Type', 'application/json')
-    //        .send('{"username":"u1","password":"p1"}')
-    //        .end(function() {
-    //            var socket1 = require('socket.io-client');
-    //            var client1 = socket1('http://localhost:3000/');
-    //
-    //            client1.on('login', function(res) {
-    //                console.log(res);
-    //                expect(res.status).to.equal(true);
-    //                done();
-    //            });
-    //
-    //            client1.emit('login', {username: 'u1', password: 'p1'});
-    //        });
-    //});
+    it('should correctly log in', function(done) {
+        request(test_server.server)
+            .post('/createUser')
+            .set('Content-Type', 'application/json')
+            .send('{"username":"u1","password":"p1"}')
+            .end(function() {
+                var socket1 = require('socket.io-client');
+                var client1 = socket1('http://localhost:3000/', {'multiplex': false});
+
+
+                client1.on('login', function(res) {
+                    console.log(res);
+                    expect(res.status).to.equal(true);
+                    done();
+                });
+
+                client1.emit('login', {username: 'u1', password: 'p1'});
+            });
+    });
 });
 
 describe('socket send', function() {
@@ -208,16 +212,15 @@ describe('socket send', function() {
 
     beforeEach(function(done) {
         test_server = require('../server.js', {bustCache: true});
-        test_server.db.User.remove({}, function() {
-            test_server.db.Message.remove({}, done);
-        });
+        //test_server.db.User.remove({}, function() {
+        //    test_server.db.Message.remove({}, done);
+        //});
     });
 
     afterEach(function(done) {
-        test_server.server.close(function() {
-            test_server.db.User.remove({}, function() {
-                test_server.db.Message.remove({}, done);
-            })});
+        test_server.server.close(test_server.server.close(function() {
+            clearDB(done)
+        }));
 
     });
 
@@ -238,9 +241,9 @@ describe('socket send', function() {
                             .send('{"username":"u2","password":"p2"}')
                             .end(function() {
                                 var socket1 = require('socket.io-client');
-                                var client1 = socket1('http://localhost:3000/');
+                                var client1 = socket1('http://localhost:3000/', {'multiplex': false});
                                 var socket2 = require('socket.io-client');
-                                var client2 = socket2('http://localhost:3000/');
+                                var client2 = socket2('http://localhost:3000/', {'multiplex': false});
 
                                 client1.emit('login', {username: 'u1', password: 'p1'});
 
@@ -249,7 +252,8 @@ describe('socket send', function() {
                                     client1.emit('send', {receiver: 'u2', message: 'testing'});
                                 });
 
-                                client2.on('receive', function() {
+                                client1.on('sent', function() {
+                                    console.log('testing msg');
                                     done();
                                 });
 
