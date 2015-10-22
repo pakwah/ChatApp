@@ -35,4 +35,18 @@ describe('UserList', function() {
     expect(fakeAjax).to.have.been.called;
     fakeAjax.restore();
   });
+
+  it('should render a node for each user other than the current user', function() {
+    server.respondWith('GET', '/userList', [200, {"Content-Type": "application/json"},
+      '[{"username":"Joe"}, {"username":"Dave"}, {"username":"Mary"}, {"username":"Kevin"}]']);
+    server.respondImmediately = true;
+
+    var list = TestUtils.renderIntoDocument(<UserList handleClickUser={sinon.stub()} username={'Joe'}
+      activeUsers={[]} unreadCount={0} />);
+
+    var nav = TestUtils.findRenderedDOMComponentWithClass(list, 'nav');
+
+    // 3 users other than the current user and one header
+    expect(nav.props.children).to.have.length(4);
+  });
 });
