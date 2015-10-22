@@ -5,7 +5,7 @@
   "scripts": {
     "watch": "watchify client/index.js -v -t babelify -o client/bundle.js",
     "start": "concurrent \"mongod\" \"npm run watch\" \"nodemon server.js\"",
-    "test": "mocha -R nyan --compilers .:tests/compiler.js tests/test.js tests/chatpage-test.js",
+    "test": "mocha -R nyan --compilers .:tests/compiler.js tests/*test.js",
     "testserver": "mocha server-test.js"
   },
   "dependencies": {
