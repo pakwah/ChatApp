@@ -124,6 +124,7 @@ describe('userList', function() {
             .get('/userList')
             .end(function(err, res, body) {
                 expect(res.statusCode).to.equal(200);
+                console.log(res.body);
                 expect(res.body.length).to.equal(0);
                 done();
             });
@@ -173,7 +174,6 @@ describe('socket login', function() {
                 var client2 = socket2('http://localhost:3000/');
 
                 client2.on('login', function(res) {
-                    console.log(res);
                     expect(res.status).to.equal(false);
                     done();
                 });
@@ -237,10 +237,13 @@ describe('socket send', function() {
                             .set('Content-Type', 'application/json')
                             .send('{"username":"u2","password":"p2"}')
                             .end(function() {
-                                var socket1 = require('socket.io-client');
-                                var client1 = socket1('http://localhost:3000/');
-                                var socket2 = require('socket.io-client');
-                                var client2 = socket2('http://localhost:3000/');
+                                var io = require('socket.io-client');
+                                var options ={
+                                  transports: ['websocket'],
+                                  'force new connection': true
+                                };
+                                var client1 = io.connect('http://localhost:3000/', options);
+                                var client2 = io.connect('http://localhost:3000/', options);
 
                                 client1.emit('login', {username: 'u1', password: 'p1'});
 
